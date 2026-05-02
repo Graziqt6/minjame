@@ -24,7 +24,7 @@ pub mod minjame {
 
         token::transfer(
             CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 Transfer {
                     from: ctx.accounts.user_usdc.to_account_info(),
                     to: ctx.accounts.vault.to_account_info(),
@@ -40,7 +40,7 @@ pub mod minjame {
 
         token::transfer(
             CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 Transfer {
                     from: ctx.accounts.vault.to_account_info(),
                     to: ctx.accounts.user_usdc.to_account_info(),
@@ -89,7 +89,7 @@ pub mod minjame {
 
         token::transfer(
             CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 Transfer {
                     from: ctx.accounts.user_usdc.to_account_info(),
                     to: ctx.accounts.vault.to_account_info(),
@@ -105,7 +105,7 @@ pub mod minjame {
 
         token::transfer(
             CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 Transfer {
                     from: ctx.accounts.vault.to_account_info(),
                     to: ctx.accounts.user_usdc.to_account_info(),
