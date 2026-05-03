@@ -78,10 +78,21 @@ export async function fetchActiveLoan(borrower: PublicKey, wallet: WalletContext
     const data = accountInfo.data;
     let offset = 8;
     offset += 32;
-    const amount = Number(data.readBigUInt64LE(offset)) / 1_000_000; offset += 8;
-    const intentDeposit = Number(data.readBigUInt64LE(offset)) / 1_000_000; offset += 8;
+    function readU64(buf, off) {
+      let val = BigInt(0);
+      for (let i = 0; i < 8; i++) val |= BigInt(buf[off + i]) << BigInt(i * 8);
+      return Number(val);
+    }
+    function readI64(buf, off) {
+      let val = BigInt(0);
+      for (let i = 0; i < 8; i++) val |= BigInt(buf[off + i]) << BigInt(i * 8);
+      if (val >= BigInt('9223372036854775808')) val -= BigInt('18446744073709551616');
+      return Number(val);
+    }
+    const amount = readU64(data, offset) / 1_000_000; offset += 8;
+    const intentDeposit = readU64(data, offset) / 1_000_000; offset += 8;
     offset += 8;
-    const dueDateTs = Number(data.readBigInt64LE(offset)); offset += 8;
+    const dueDateTs = readI64(data, offset); offset += 8;
     const repaid = data.readUInt8(offset) === 1; offset += 1;
     const active = data.readUInt8(offset) === 1;
     if (!active) return null;
