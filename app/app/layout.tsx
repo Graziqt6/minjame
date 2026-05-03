@@ -5,7 +5,7 @@ import { WalletProviderWrapper } from "./wallet-provider";
 
 export const metadata: Metadata = {
   title: "MINJAME",
-  description: "On-chain micro-lending for Indonesian crypto users",
+  description: "Pinjaman pertama tanpa jaminan. Bangun kredit onchain di Solana.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
