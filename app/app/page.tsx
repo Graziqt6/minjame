@@ -174,7 +174,7 @@ export default function Home() {
             <div className="flex justify-between">
               <div>
                 <p className="text-xs text-gray-400">Limit</p>
-                <p className="text-lg font-semibold">${eligibility.limit} USDC</p>
+                <p className="text-lg font-semibold">${TIERS[score.tier].limit} USDC</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-400">Bunga/tahun</p>
