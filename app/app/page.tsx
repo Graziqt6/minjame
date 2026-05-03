@@ -59,7 +59,8 @@ export default function Home() {
       const result = await checkEligibility(publicKey!.toString());
       setEligibility(result);
       if (result.eligible) {
-        setBorrowAmount(result.limit);
+        const tierLimit = TIERS[scoreData?.tier ?? 0].limit;
+        setBorrowAmount(Math.min(result.limit, tierLimit));
         setAppState("eligible");
       } else {
         setAppState("ineligible");
@@ -190,7 +191,7 @@ export default function Home() {
                 <span>Jumlah</span>
                 <span>${borrowAmount} USDC</span>
               </div>
-              <input type="range" min={1} max={eligibility.limit} value={borrowAmount}
+              <input type="range" min={1} max={TIERS[score.tier].limit} value={borrowAmount}
                 onChange={e => setBorrowAmount(Number(e.target.value))}
                 className="w-full accent-blue-500" />
             </div>
