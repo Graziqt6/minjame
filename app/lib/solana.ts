@@ -43,7 +43,10 @@ export async function getUserUsdcAccount(borrower: PublicKey): Promise<PublicKey
 
 function encodeU64(value: number): Buffer {
   const buf = Buffer.alloc(8);
-  buf.writeBigUInt64LE(BigInt(value));
+  const big = BigInt(value);
+  for (let i = 0; i < 8; i++) {
+    buf[i] = Number((big >> BigInt(i * 8)) & BigInt(0xff));
+  }
   return buf;
 }
 
