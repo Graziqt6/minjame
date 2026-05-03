@@ -45,15 +45,16 @@ export default function Home() {
     setAppState("checking");
     setError("");
     try {
-      const activeLoan = await fetchActiveLoan(publicKey!, wallet);
+      let activeLoan = null;
+      let scoreData = null;
+      try { activeLoan = await fetchActiveLoan(publicKey!, wallet); } catch {}
+      try { scoreData = await fetchUserScore(publicKey!, wallet); } catch {}
       if (activeLoan) {
         setLoan(activeLoan);
         setAppState("active_loan");
-        const scoreData = await fetchUserScore(publicKey!, wallet);
         if (scoreData) setScore(scoreData);
         return;
       }
-      const scoreData = await fetchUserScore(publicKey!, wallet);
       if (scoreData) setScore(scoreData);
       const result = await checkEligibility(publicKey!.toString());
       setEligibility(result);
@@ -64,6 +65,7 @@ export default function Home() {
         setAppState("ineligible");
       }
     } catch (e) {
+      console.error("Eligibility check failed:", e);
       setAppState("ineligible");
     }
   }
@@ -81,6 +83,7 @@ export default function Home() {
         setAppState("active_loan");
       }
     } catch (e: any) {
+      console.error("BORROW ERROR:", e);
       setError(e.message || "Transaksi gagal. Coba lagi.");
     }
     setLoading(false);
@@ -112,7 +115,7 @@ export default function Home() {
     <main className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-md mb-8 flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">MINJAME</h1>
-        <WalletMultiButton style={{ fontSize: "14px", padding: "8px 16px", borderRadius: "8px" }} />
+        <div suppressHydrationWarning><WalletMultiButton style={{ fontSize: "14px", padding: "8px 16px", borderRadius: "8px" }} /></div>
       </div>
 
       {appState === "connect" && (
