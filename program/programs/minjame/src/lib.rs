@@ -4,23 +4,30 @@ use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 declare_id!("86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4");
 
 const INTENT_DEPOSIT: u64 = 2_000_000;
-const LOAN_AMOUNT_SMALL: u64 = 5_000_000;
-const LOAN_AMOUNT_LARGE: u64 = 10_000_000;
 const LOAN_DURATION: i64 = 14 * 24 * 60 * 60;
+
+// Tier max loan amounts in USDC lamports (6 decimals)
+const TIER_MAX: [u64; 4] = [
+    10_000_000,   // Tier 0: $10
+    50_000_000,   // Tier 1: $50
+    150_000_000,  // Tier 2: $150
+    500_000_000,  // Tier 3: $500
+];
 
 #[program]
 pub mod minjame {
     use super::*;
 
     pub fn create_loan(ctx: Context<CreateLoan>, amount: u64) -> Result<()> {
-        require!(
-            amount == LOAN_AMOUNT_SMALL || amount == LOAN_AMOUNT_LARGE,
-            MinjameError::InvalidLoanAmount
-        );
         let loan = &mut ctx.accounts.loan;
         let score = &mut ctx.accounts.user_score;
         let clock = Clock::get()?;
         require!(!loan.active, MinjameError::LoanAlreadyActive);
+
+        // Validate amount is within tier limit
+        let tier_index = score.tier as usize;
+        let max_amount = TIER_MAX[tier_index.min(3)];
+        require!(amount > 0 && amount <= max_amount, MinjameError::ExceedsLimit);
 
         token::transfer(
             CpiContext::new(
@@ -128,7 +135,7 @@ pub mod minjame {
             score.score = score.score.saturating_sub(5);
         }
 
-        score.tier = match score.repayment_count {
+        score.tier = match score.on_time_count {
             0..=2 => 0,
             3..=7 => 1,
             8..=14 => 2,
@@ -223,4 +230,6 @@ pub enum MinjameError {
     NoActiveLoan,
     #[msg("Loan already repaid")]
     AlreadyRepaid,
+    #[msg("Amount exceeds your current tier limit")]
+    ExceedsLimit,
 }
