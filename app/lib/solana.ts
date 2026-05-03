@@ -78,12 +78,12 @@ export async function fetchActiveLoan(borrower: PublicKey, wallet: WalletContext
     const data = accountInfo.data;
     let offset = 8;
     offset += 32;
-    function readU64(buf, off) {
+    function readU64(buf: Buffer, off: number) {
       let val = BigInt(0);
       for (let i = 0; i < 8; i++) val |= BigInt(buf[off + i]) << BigInt(i * 8);
       return Number(val);
     }
-    function readI64(buf, off) {
+    function readI64(buf: Buffer, off: number) {
       let val = BigInt(0);
       for (let i = 0; i < 8; i++) val |= BigInt(buf[off + i]) << BigInt(i * 8);
       if (val >= BigInt('9223372036854775808')) val -= BigInt('18446744073709551616');
