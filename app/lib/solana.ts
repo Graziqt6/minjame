@@ -44,7 +44,8 @@ export async function fetchUserScore(borrower: PublicKey, wallet: WalletContextS
   try {
     const program = getProgram(wallet);
     const scorePDA = await getScorePDA(borrower);
-    const scoreAccount = await (program.account as any).userScore.fetch(scorePDA);
+    const scoreAccount = await (program.account as any).userScore.fetchNullable(scorePDA);
+    if (!scoreAccount) return null;
     return {
       score: scoreAccount.score,
       tier: scoreAccount.tier,
@@ -60,7 +61,8 @@ export async function fetchActiveLoan(borrower: PublicKey, wallet: WalletContext
   try {
     const program = getProgram(wallet);
     const loanPDA = await getLoanPDA(borrower);
-    const loanAccount = await (program.account as any).loanAccount.fetch(loanPDA);
+    const loanAccount = await (program.account as any).loanAccount.fetchNullable(loanPDA);
+    if (!loanAccount) return null;
     if (!loanAccount.active) return null;
     return {
       amount: loanAccount.amount.toNumber() / 1_000_000,

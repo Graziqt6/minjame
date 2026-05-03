@@ -11,3 +11,7 @@ export const TIERS = [
 
 export const INTENT_DEPOSIT = 2;
 export const LOAN_DURATION_DAYS = 14;
+
+export const USDC_MINT = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
+export const VAULT_ACCOUNT = '2NZ8kcBvantiKCbQtHCxEVNaP82m73Jnsonz8nDXfSdy';
+export const VAULT_AUTHORITY = 'DonWQJpoUgjCxwBQ3puMd7M7ZL4jLYpnE6Hz7G1Y1r4u';
