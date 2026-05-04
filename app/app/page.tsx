@@ -11,7 +11,6 @@ const DEMO_CAP = 50;
 
 const TEXTS = {
   en: {
-    tierMax: "You have reached the highest level — Mitra.",
     subtitle: "On-chain credit for everyday crypto users",
     tagline: "No collateral. No KYC. Build your on-chain credit score.",
     bullets: ["No collateral required", "No KYC or documents", "Build permanent on-chain credit"],
@@ -48,6 +47,7 @@ const TEXTS = {
     depositBack: "$2 deposit has been returned to your wallet.",
     viewExplorer: "View on Solana Explorer",
     ineligible: "Not eligible yet",
+    tierMax: "You have reached the highest level — Mitra.",
     ineligibleHint: "Your wallet history is not sufficient.",
     whatToDo: "What you need to do:",
     tip1: "Use your wallet for regular transactions",
@@ -60,7 +60,7 @@ const TEXTS = {
     network: "Solana Devnet",
   },
   id: {
-    tierMax: t.tierMax,
+    tierMax: "Kamu sudah di level tertinggi — Mitra.",
     subtitle: "Kredit onchain untuk pengguna crypto sehari-hari",
     tagline: "Tanpa jaminan. Tanpa KYC. Bangun skor kredit onchain kamu.",
     bullets: ["Tidak butuh jaminan", "Tidak perlu KYC atau dokumen", "Bangun kredit permanen di blockchain"],
@@ -97,6 +97,7 @@ const TEXTS = {
     depositBack: "Deposit $2 sudah kembali ke dompetmu.",
     viewExplorer: "Lihat di Solana Explorer",
     ineligible: "Belum layak saat ini",
+    tierMax: "Kamu sudah di level tertinggi — Mitra.",
     ineligibleHint: "Riwayat dompet belum cukup.",
     whatToDo: "Yang perlu kamu lakukan:",
     tip1: "Gunakan dompetmu untuk transaksi rutin",
@@ -386,7 +387,7 @@ export default function Home() {
                   </div>
                 )}
                 {score.tier === 3 && (
-                  <p className="text-xs text-green-400">Kamu sudah di level tertinggi — Mitra.</p>
+                  <p className="text-xs text-green-400">{t.tierMax}</p>
                 )}
                 <div className="flex gap-4 text-xs text-gray-500 pt-1">
                   <span>• Semua data tersimpan on-chain</span>
