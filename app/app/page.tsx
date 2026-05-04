@@ -48,6 +48,7 @@ const TEXTS = {
     viewExplorer: "View on Solana Explorer",
     ineligible: "Not eligible yet",
     tierMax: "You have reached the highest level — Mitra.",
+    dataOnchain: "All data stored on-chain",
     ineligibleHint: "Your wallet history is not sufficient.",
     whatToDo: "What you need to do:",
     tip1: "Use your wallet for regular transactions",
@@ -390,7 +391,7 @@ export default function Home() {
                   <p className="text-xs text-green-400">{t.tierMax}</p>
                 )}
                 <div className="flex gap-4 text-xs text-gray-500 pt-1">
-                  <span>• Semua data tersimpan on-chain</span>
+                  <span>• {t.dataOnchain}</span>
                   <span>• {t.noKyc}</span>
                 </div>
               </div>
