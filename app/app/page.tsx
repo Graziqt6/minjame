@@ -11,6 +11,7 @@ const DEMO_CAP = 50;
 
 const TEXTS = {
   en: {
+    tierMax: "You have reached the highest level — Mitra.",
     subtitle: "On-chain credit for everyday crypto users",
     tagline: "No collateral. No KYC. Build your on-chain credit score.",
     bullets: ["No collateral required", "No KYC or documents", "Build permanent on-chain credit"],
@@ -59,6 +60,7 @@ const TEXTS = {
     network: "Solana Devnet",
   },
   id: {
+    tierMax: t.tierMax,
     subtitle: "Kredit onchain untuk pengguna crypto sehari-hari",
     tagline: "Tanpa jaminan. Tanpa KYC. Bangun skor kredit onchain kamu.",
     bullets: ["Tidak butuh jaminan", "Tidak perlu KYC atau dokumen", "Bangun kredit permanen di blockchain"],
@@ -129,7 +131,7 @@ export default function Home() {
   const { publicKey, connected } = wallet;
   const [lang, setLang] = useState<Lang>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("minjame_lang") as Lang) || "id";
+      return (localStorage.getItem("minjame_lang") as Lang) || "en";
     }
     return "id";
   });
@@ -218,7 +220,7 @@ export default function Home() {
     try {
       const tx = await createLoan(wallet, borrowAmount);
       setTxHash(tx);
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 3000));
       const activeLoan = await fetchActiveLoan(publicKey, wallet);
       if (activeLoan) { setLoan(activeLoan); setAppState("active_loan"); }
       else { await runEligibilityCheck(); }
