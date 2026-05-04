@@ -127,7 +127,18 @@ interface ScoreState {
 export default function Home() {
   const wallet = useWallet();
   const { publicKey, connected } = wallet;
-  const [lang, setLang] = useState<Lang>("id");
+  const [lang, setLang] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("minjame_lang") as Lang) || "id";
+    }
+    return "id";
+  });
+
+  function toggleLang() {
+    const next = lang === "id" ? "en" : "id";
+    setLang(next);
+    if (typeof window !== "undefined") localStorage.setItem("minjame_lang", next);
+  }
   const [appState, setAppState] = useState<AppState>("connect");
   const [eligibility, setEligibility] = useState<EligibilityResult | null>(null);
   const [borrowAmount, setBorrowAmount] = useState(10);
@@ -250,7 +261,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setLang(lang === "id" ? "en" : "id")}
+              onClick={toggleLang}
               className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg text-gray-300 transition-all">
               {lang === "id" ? "EN" : "ID"}
             </button>
@@ -426,6 +437,14 @@ export default function Home() {
                   <div className="flex justify-between text-xs text-gray-600">
                     <span>$1</span><span>${uiMax}</span>
                   </div>
+                  <div className="flex gap-2">
+                    {[10, 25, uiMax].map((v, i) => (
+                      <button key={i} onClick={() => { setBorrowAmount(Math.min(v, uiMax)); setInputValue(String(Math.min(v, uiMax))); }}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all border ${borrowAmount === Math.min(v, uiMax) ? "border-blue-500 text-blue-400 bg-blue-900 bg-opacity-30" : "border-gray-700 text-gray-400 hover:border-gray-500"}`}>
+                        {i === 2 ? "MAX" : `$${v}`}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Loan Breakdown */}
@@ -530,13 +549,15 @@ export default function Home() {
             <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 text-center space-y-4 mx-4 max-w-sm w-full">
               <div className="text-5xl">✓</div>
               <p className="text-2xl font-bold text-green-400">{t.success}</p>
-              <p className="text-gray-300">{t.scoreUp}</p>
               {scoreGain > 0 && (
-                <div className="bg-green-900 bg-opacity-30 border border-green-800 rounded-xl p-3">
-                  <p className="text-green-400 font-bold text-lg">+{scoreGain} score</p>
-                  <p className="text-gray-400 text-sm">New score: {score.score + scoreGain}</p>
+                <div className="bg-green-900 bg-opacity-30 border border-green-800 rounded-xl p-4 space-y-1">
+                  <p className="text-green-400 font-bold text-2xl">+{scoreGain} score</p>
+                  <p className="text-gray-300 text-sm">Your credit score increased</p>
+                  <p className="text-gray-400 text-xs">New score: {score.score + scoreGain}</p>
                 </div>
               )}
+              <p className="text-green-300 text-sm font-medium">You unlocked higher borrowing power</p>
+              <p className="text-gray-400 text-sm">{t.depositBack}</p>
               <p className="text-sm text-gray-400">{t.depositBack}</p>
               {score.tier < 3 && onTimeLeft > 0 && (
                 <p className="text-xs text-blue-400">{onTimeLeft} {t.nextTier} {nextTierData.name} (${Math.min(nextTierData.limit, DEMO_CAP)} limit)</p>
