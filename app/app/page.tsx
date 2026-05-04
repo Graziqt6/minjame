@@ -207,8 +207,10 @@ export default function Home() {
     try {
       const tx = await createLoan(wallet, borrowAmount);
       setTxHash(tx);
+      await new Promise(r => setTimeout(r, 2000));
       const activeLoan = await fetchActiveLoan(publicKey, wallet);
       if (activeLoan) { setLoan(activeLoan); setAppState("active_loan"); }
+      else { await runEligibilityCheck(); }
     } catch (e: any) {
       console.error("BORROW ERROR:", e);
       setError(e.message || "Transaction failed. Try again.");
