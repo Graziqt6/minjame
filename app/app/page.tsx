@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { EntryScreen } from "./entry";
+import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { checkEligibility, EligibilityResult } from "../lib/eligibility";
@@ -131,6 +133,12 @@ interface ScoreState {
 export default function Home() {
   const wallet = useWallet();
   const { publicKey, connected } = wallet;
+  const [entered, setEntered] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("minjame_entered") === "true";
+    }
+    return false;
+  });
   const [lang, setLang] = useState<Lang>(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("minjame_lang") as Lang) || "en";
@@ -253,11 +261,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+      {!entered && <EntryScreen onEnter={() => setEntered(true)} lang={lang} />}
 
       {/* HEADER */}
       <header className="border-b border-gray-800 px-6 py-4">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="MINJAME" width={32} height={32} className="rounded-lg" />
             <div>
               <h1 className="text-xl font-bold tracking-tight">MINJAME</h1>
               <p className="text-xs text-gray-500">{t.network} · {t.noKyc}</p>
