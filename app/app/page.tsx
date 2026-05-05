@@ -261,11 +261,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen text-white" style={{ background: "#09090f" }}>
+    <div className="min-h-screen text-white" style={{ background: "#0d0d18" }}>
       {!entered && <EntryScreen onEnter={() => setEntered(true)} lang={lang} />}
 
       {/* HEADER */}
-      <header className="px-6 py-3 sticky top-0 z-40 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(9,9,15,0.85)" }}>
+      <header className="px-6 py-3 sticky top-0 z-40 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(9,9,15,0.85)" }}>
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="MINJAME" width={28} height={28} className="rounded-lg" />
@@ -278,7 +278,7 @@ export default function Home() {
             <button
               onClick={toggleLang}
               className="text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)" }}>
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)" }}>
               {lang === "id" ? "EN" : "ID"}
             </button>
             <div suppressHydrationWarning>
@@ -288,7 +288,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-6 py-10">
 
         {/* CONNECT STATE */}
         {appState === "connect" && (
@@ -323,12 +323,12 @@ export default function Home() {
         {/* INELIGIBLE */}
         {appState === "ineligible" && (
           <div className="max-w-md mx-auto space-y-3">
-            <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <p className="text-3xl mb-3">⏳</p>
               <p className="font-semibold text-base">{t.ineligible}</p>
               <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>{eligibility?.reason || t.ineligibleHint}</p>
             </div>
-            <div className="rounded-2xl p-5 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="rounded-2xl p-5 space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>{t.whatToDo}</p>
               {[t.tip1, t.tip2, t.tip3].map((tip, i) => (
                 <p key={i} className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>· {tip}</p>
@@ -351,13 +351,13 @@ export default function Home() {
                   <div>
                     <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.level}</p>
                     <div className="flex items-center gap-2">
-                      <p className="text-3xl font-black tracking-tight" style={{ color: tier.color }}>{tier.name}</p>
+                      <p className="text-3xl font-black tracking-tight text-white">{tier.name}</p>
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)" }}>{t.onchain}</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.score}</p>
-                    <p className="text-4xl font-black tracking-tight">{score.score}</p>
+                    <p className="text-5xl font-black tracking-tight">{score.score}</p>
                     <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{t.scoreHint}</p>
                   </div>
                 </div>
@@ -377,7 +377,7 @@ export default function Home() {
               </div>
 
               {/* Tier Explanation */}
-              <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                   {score.tier === 0 ? t.tierHint0 : t.tierHint1}
                 </p>
@@ -406,7 +406,7 @@ export default function Home() {
               </div>
 
               {/* Tier Road Map */}
-              <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <p className="text-[10px] uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>Tier Progression</p>
                 <div className="space-y-2">
                   {TIERS.map((t_item, i) => (
@@ -429,7 +429,7 @@ export default function Home() {
 
             {/* RIGHT: Action Panel (2/5) */}
             <div className="lg:col-span-2 space-y-3">
-              <div className="rounded-2xl p-6 space-y-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="rounded-2xl p-6 space-y-5" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <p className="font-bold text-base tracking-tight">{t.borrow}</p>
 
                 {/* Amount Input */}
@@ -473,7 +473,7 @@ export default function Home() {
                     <span className="font-medium">${borrowAmount.toFixed(2)} USDC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.deposit} <span className="text-green-500 text-xs">({t.depositNote})</span></span>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.deposit}</span>
                     <span className="font-medium text-yellow-400">${INTENT_DEPOSIT}.00 USDC</span>
                   </div>
                   <div className="flex justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
@@ -494,7 +494,7 @@ export default function Home() {
                 {error && <p className="text-red-400 text-xs">{error}</p>}
                 <button onClick={handleBorrow} disabled={loading}
                   className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-40"
-                  style={{ background: tier.color }}>
+                  style={{ background: "#7c3aed" }}>
                   {loading ? t.processing : `${t.borrowBtn} · $${borrowAmount} USDC`}
                 </button>
               </div>
@@ -505,14 +505,14 @@ export default function Home() {
         {/* ACTIVE LOAN */}
         {appState === "active_loan" && loan && (
           <div className="max-w-2xl mx-auto space-y-3">
-            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(34,197,94,0.2)" }}>
+            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-400" style={{ boxShadow: "0 0 6px #22c55e" }} />
                   <p className="font-bold text-base">{t.activeLoan}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>{t.onchain}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{t.onchain}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>Active</span>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <p className="font-bold">{t.repayNow}</p>
               <div className="rounded-xl p-4 space-y-2.5 text-sm" style={{ background: "rgba(0,0,0,0.25)" }}>
                 <div className="flex justify-between">
