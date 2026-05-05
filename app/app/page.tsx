@@ -108,6 +108,7 @@ const TEXTS = {
     processing: "Memproses...",
     days: "hari",
     onchain: "Onchain",
+    dataOnchain: "Semua data tersimpan on-chain",
     noKyc: "Tanpa KYC · Tanpa Bank",
     network: "Solana Devnet",
   }
