@@ -151,6 +151,7 @@ export default function Home() {
     setLang(next);
     if (typeof window !== "undefined") localStorage.setItem("minjame_lang", next);
   }
+
   const [appState, setAppState] = useState<AppState>("connect");
   const [eligibility, setEligibility] = useState<EligibilityResult | null>(null);
   const [borrowAmount, setBorrowAmount] = useState(10);
@@ -260,27 +261,28 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen text-white" style={{ background: "#09090f" }}>
       {!entered && <EntryScreen onEnter={() => setEntered(true)} lang={lang} />}
 
       {/* HEADER */}
-      <header className="border-b border-gray-800 px-6 py-4">
+      <header className="px-6 py-3 sticky top-0 z-40 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(9,9,15,0.85)" }}>
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="MINJAME" width={32} height={32} className="rounded-lg" />
+            <Image src="/logo.png" alt="MINJAME" width={28} height={28} className="rounded-lg" />
             <div>
-              <h1 className="text-xl font-bold tracking-tight">MINJAME</h1>
-              <p className="text-xs text-gray-500">{t.network} · {t.noKyc}</p>
+              <h1 className="text-[15px] font-bold tracking-tight leading-none">MINJAME</h1>
+              <p className="text-[10px] mt-0.5 uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.28)" }}>{t.network} · {t.noKyc}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleLang}
-              className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg text-gray-300 transition-all">
+              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.6)" }}>
               {lang === "id" ? "EN" : "ID"}
             </button>
             <div suppressHydrationWarning>
-              <WalletMultiButton style={{ fontSize: "13px", padding: "8px 16px", borderRadius: "8px", height: "36px" }} />
+              <WalletMultiButton style={{ fontSize: "12px", padding: "8px 16px", borderRadius: "8px", height: "34px" }} />
             </div>
           </div>
         </div>
@@ -290,22 +292,22 @@ export default function Home() {
 
         {/* CONNECT STATE */}
         {appState === "connect" && (
-          <div className="flex flex-col items-center justify-center min-h-96 text-center space-y-8">
+          <div className="flex flex-col items-center justify-center min-h-96 text-center space-y-10">
             <div className="space-y-3">
-              <h2 className="text-4xl font-bold">MINJAME</h2>
-              <p className="text-xl text-gray-400">{t.subtitle}</p>
-              <p className="text-gray-500">{t.tagline}</p>
+              <h2 className="text-5xl font-black tracking-tight">MINJAME</h2>
+              <p className="text-lg" style={{ color: "rgba(255,255,255,0.5)" }}>{t.subtitle}</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>{t.tagline}</p>
             </div>
             <div className="flex flex-col gap-3 text-left max-w-xs">
               {t.bullets.map((b, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-green-900 text-green-400 flex items-center justify-center text-xs font-bold">{i + 1}</div>
-                  <span className="text-gray-300 text-sm">{b}</span>
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>{i + 1}</div>
+                  <span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{b}</span>
                 </div>
               ))}
             </div>
             <div suppressHydrationWarning>
-              <WalletMultiButton style={{ fontSize: "15px", padding: "12px 32px", borderRadius: "10px" }} />
+              <WalletMultiButton style={{ fontSize: "14px", padding: "12px 32px", borderRadius: "10px" }} />
             </div>
           </div>
         )}
@@ -313,23 +315,23 @@ export default function Home() {
         {/* CHECKING */}
         {appState === "checking" && (
           <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-gray-400">{t.checking}</p>
+            <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(124,58,237,0.4)", borderTopColor: "#7c3aed" }} />
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{t.checking}</p>
           </div>
         )}
 
         {/* INELIGIBLE */}
         {appState === "ineligible" && (
-          <div className="max-w-md mx-auto space-y-4">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 text-center">
+          <div className="max-w-md mx-auto space-y-3">
+            <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <p className="text-3xl mb-3">⏳</p>
-              <p className="font-semibold text-lg">{t.ineligible}</p>
-              <p className="text-gray-400 text-sm mt-2">{eligibility?.reason || t.ineligibleHint}</p>
+              <p className="font-semibold text-base">{t.ineligible}</p>
+              <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>{eligibility?.reason || t.ineligibleHint}</p>
             </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 space-y-2">
-              <p className="text-sm font-medium text-gray-300">{t.whatToDo}</p>
+            <div className="rounded-2xl p-5 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>{t.whatToDo}</p>
               {[t.tip1, t.tip2, t.tip3].map((tip, i) => (
-                <p key={i} className="text-sm text-gray-400">• {tip}</p>
+                <p key={i} className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>· {tip}</p>
               ))}
             </div>
           </div>
@@ -337,62 +339,59 @@ export default function Home() {
 
         {/* ELIGIBLE — 2 COLUMN LAYOUT */}
         {appState === "eligible" && eligibility && (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
             {/* LEFT: Credit Overview (3/5) */}
-            <div className="lg:col-span-3 space-y-4">
+            <div className="lg:col-span-3 space-y-3">
 
               {/* Credit Card */}
-              <div className="rounded-2xl p-6 space-y-4"
-                style={{ background: `linear-gradient(135deg, ${tier.color}22, #111827)`, border: `1px solid ${tier.color}44` }}>
+              <div className="rounded-2xl p-6 space-y-5"
+                style={{ background: `linear-gradient(135deg, ${tier.color}18, rgba(255,255,255,0.02))`, border: `1px solid ${tier.color}35` }}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">{t.level}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-2xl font-bold" style={{ color: tier.color }}>{tier.name}</p>
-                      <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">{t.onchain}</span>
+                    <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.level}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-3xl font-black tracking-tight" style={{ color: tier.color }}>{tier.name}</p>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)" }}>{t.onchain}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">{t.score}</p>
-                    <p className="text-2xl font-bold mt-1">{score.score}</p>
-                    <p className="text-xs text-gray-500">{t.scoreHint}</p>
+                    <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.score}</p>
+                    <p className="text-4xl font-black tracking-tight">{score.score}</p>
+                    <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{t.scoreHint}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-900 bg-opacity-60 rounded-xl p-3">
-                    <p className="text-xs text-gray-400">{t.limit}</p>
-                    <p className="text-xl font-bold mt-1">${uiMax} USDC</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                    <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.limit}</p>
+                    <p className="text-xl font-bold">${uiMax} <span className="text-sm font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>USDC</span></p>
                   </div>
-                  <div className="bg-gray-900 bg-opacity-60 rounded-xl p-3">
-                    <p className="text-xs text-gray-400">{t.rate}</p>
-                    <p className="text-xl font-bold mt-1">{tier.rate}%</p>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                    <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.rate}</p>
+                    <p className="text-xl font-bold">{tier.rate}<span className="text-sm font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>%</span></p>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-500 truncate">{publicKey?.toString().slice(0, 28)}...</p>
+                <p className="text-[11px] font-mono truncate" style={{ color: "rgba(255,255,255,0.2)" }}>{publicKey?.toString().slice(0, 32)}...</p>
               </div>
 
               {/* Tier Explanation */}
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
-                <p className="text-sm text-gray-300">
+              <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                   {score.tier === 0 ? t.tierHint0 : t.tierHint1}
                 </p>
                 {score.tier < 3 && onTimeLeft > 0 && (
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs text-gray-400">
+                    <div className="flex justify-between text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
                       <span>{tier.name}</span>
-                      <span style={{ color: nextTierData.color }}>{nextTierData.name} (${Math.min(nextTierData.limit, DEMO_CAP)} limit · {nextTierData.rate}% APR)</span>
+                      <span style={{ color: nextTierData.color }}>{nextTierData.name} · ${Math.min(nextTierData.limit, DEMO_CAP)} · {nextTierData.rate}%</span>
                     </div>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
-                      <div className="h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(100, (score.onTimeCount / (onTimeNeeded ?? 1)) * 100)}%`,
-                          background: tier.color
-                        }} />
+                    <div className="w-full rounded-full h-1.5" style={{ background: "rgba(255,255,255,0.07)" }}>
+                      <div className="h-1.5 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, (score.onTimeCount / (onTimeNeeded ?? 1)) * 100)}%`, background: tier.color }} />
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
                       {onTimeLeft} {t.nextTier} {nextTierData.name}
                     </p>
                   </div>
@@ -400,27 +399,28 @@ export default function Home() {
                 {score.tier === 3 && (
                   <p className="text-xs text-green-400">{t.tierMax}</p>
                 )}
-                <div className="flex gap-4 text-xs text-gray-500 pt-1">
-                  <span>• {t.dataOnchain}</span>
-                  <span>• {t.noKyc}</span>
+                <div className="flex gap-4 text-[11px] pt-1" style={{ color: "rgba(255,255,255,0.25)" }}>
+                  <span>· {t.dataOnchain}</span>
+                  <span>· {t.noKyc}</span>
                 </div>
               </div>
 
               {/* Tier Road Map */}
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Tier Progression</p>
+              <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>Tier Progression</p>
                 <div className="space-y-2">
                   {TIERS.map((t_item, i) => (
-                    <div key={i} className={`flex items-center justify-between p-3 rounded-xl transition-all ${i === score.tier ? 'border' : 'opacity-50'}`}
-                      style={i === score.tier ? { borderColor: t_item.color, background: `${t_item.color}11` } : {}}>
+                    <div key={i}
+                      className="flex items-center justify-between p-3 rounded-xl transition-all"
+                      style={i === score.tier
+                        ? { border: `1px solid ${t_item.color}50`, background: `${t_item.color}0d` }
+                        : { opacity: 0.4 }}>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ background: t_item.color }} />
-                        <span className="text-sm font-medium" style={i === score.tier ? { color: t_item.color } : {}}>{t_item.name}</span>
-                        {i === score.tier && <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">current</span>}
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t_item.color }} />
+                        <span className="text-sm font-semibold" style={i === score.tier ? { color: t_item.color } : { color: "rgba(255,255,255,0.6)" }}>{t_item.name}</span>
+                        {i === score.tier && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)" }}>current</span>}
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm text-gray-300">${Math.min(t_item.limit, DEMO_CAP)} · {t_item.rate}%</span>
-                      </div>
+                      <span className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>${Math.min(t_item.limit, DEMO_CAP)} · {t_item.rate}%</span>
                     </div>
                   ))}
                 </div>
@@ -428,33 +428,38 @@ export default function Home() {
             </div>
 
             {/* RIGHT: Action Panel (2/5) */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 space-y-5">
-                <p className="font-semibold text-lg">{t.borrow}</p>
+            <div className="lg:col-span-2 space-y-3">
+              <div className="rounded-2xl p-6 space-y-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <p className="font-bold text-base tracking-tight">{t.borrow}</p>
 
                 {/* Amount Input */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">{t.amount}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm text-gray-400">$</span>
+                    <span className="text-xs uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>{t.amount}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>$</span>
                       <input type="number" min={1} max={uiMax} value={inputValue}
                         onChange={e => handleInputChange(e.target.value)}
                         onBlur={handleInputBlur}
-                        className="w-20 bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-sm text-right text-white focus:outline-none focus:border-blue-500" />
-                      <span className="text-sm text-gray-400">USDC</span>
+                        className="w-16 rounded-lg px-2 py-1.5 text-sm text-right font-semibold focus:outline-none"
+                        style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }} />
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>USDC</span>
                     </div>
                   </div>
                   <input type="range" min={1} max={uiMax} value={borrowAmount}
                     onChange={e => handleSliderChange(Number(e.target.value))}
-                    className="w-full accent-blue-500" />
-                  <div className="flex justify-between text-xs text-gray-600">
+                    className="w-full accent-violet-600" />
+                  <div className="flex justify-between text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
                     <span>$1</span><span>${uiMax}</span>
                   </div>
                   <div className="flex gap-2">
                     {[10, 25, uiMax].map((v, i) => (
-                      <button key={i} onClick={() => { setBorrowAmount(Math.min(v, uiMax)); setInputValue(String(Math.min(v, uiMax))); }}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all border ${borrowAmount === Math.min(v, uiMax) ? "border-blue-500 text-blue-400 bg-blue-900 bg-opacity-30" : "border-gray-700 text-gray-400 hover:border-gray-500"}`}>
+                      <button key={i}
+                        onClick={() => { setBorrowAmount(Math.min(v, uiMax)); setInputValue(String(Math.min(v, uiMax))); }}
+                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={borrowAmount === Math.min(v, uiMax)
+                          ? { border: "1px solid rgba(124,58,237,0.6)", color: "#a78bfa", background: "rgba(124,58,237,0.12)" }
+                          : { border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", background: "transparent" }}>
                         {i === 2 ? "MAX" : `$${v}`}
                       </button>
                     ))}
@@ -462,33 +467,33 @@ export default function Home() {
                 </div>
 
                 {/* Loan Breakdown */}
-                <div className="bg-gray-800 rounded-xl p-4 space-y-2 text-sm">
+                <div className="rounded-xl p-4 space-y-2.5 text-sm" style={{ background: "rgba(0,0,0,0.25)" }}>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">{t.youGet}</span>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.youGet}</span>
                     <span className="font-medium">${borrowAmount.toFixed(2)} USDC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">{t.deposit} <span className="text-green-500 text-xs">({t.depositNote})</span></span>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.deposit} <span className="text-green-500 text-xs">({t.depositNote})</span></span>
                     <span className="font-medium text-yellow-400">${INTENT_DEPOSIT}.00 USDC</span>
                   </div>
-                  <div className="border-t border-gray-700 pt-2 flex justify-between">
-                    <span className="text-gray-400">{t.totalRepay}</span>
-                    <span className="font-medium">${totalRepayment.toFixed(2)} USDC</span>
+                  <div className="flex justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.totalRepay}</span>
+                    <span className="font-bold">${totalRepayment.toFixed(2)} USDC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">{t.dueDate}</span>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.dueDate}</span>
                     <span className="font-medium">{dueDate.toLocaleDateString("id-ID")} ({LOAN_DURATION_DAYS} {t.days})</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">{t.interest}</span>
+                    <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.interest}</span>
                     <span className="font-medium">${interest.toFixed(2)} ({tier.rate}% APR)</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-500">* {t.depositExplain}</p>
-                {error && <p className="text-red-400 text-sm">{error}</p>}
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>* {t.depositExplain}</p>
+                {error && <p className="text-red-400 text-xs">{error}</p>}
                 <button onClick={handleBorrow} disabled={loading}
-                  className="w-full py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-50 text-sm"
+                  className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-40"
                   style={{ background: tier.color }}>
                   {loading ? t.processing : `${t.borrowBtn} · $${borrowAmount} USDC`}
                 </button>
@@ -497,60 +502,64 @@ export default function Home() {
           </div>
         )}
 
-        {/* ACTIVE LOAN — FULL WIDTH */}
+        {/* ACTIVE LOAN */}
         {appState === "active_loan" && loan && (
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="bg-gray-900 border border-green-800 rounded-2xl p-6 space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
+            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(34,197,94,0.2)" }}>
               <div className="flex justify-between items-center">
-                <p className="font-semibold text-lg">{t.activeLoan}</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">{t.onchain}</span>
-                  <span className="text-xs bg-green-900 text-green-400 px-2 py-1 rounded-full">Active</span>
+                  <div className="w-2 h-2 rounded-full bg-green-400" style={{ boxShadow: "0 0 6px #22c55e" }} />
+                  <p className="font-bold text-base">{t.activeLoan}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>{t.onchain}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>Active</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">{t.loanAmount}</p>
-                  <p className="font-bold text-lg mt-1">${loan.amount} USDC</p>
+                <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.loanAmount}</p>
+                  <p className="font-bold text-xl">${loan.amount} <span className="text-sm font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>USDC</span></p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">{t.depositHeld}</p>
-                  <p className="font-bold text-lg mt-1 text-yellow-400">${loan.intentDeposit} USDC</p>
+                <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.depositHeld}</p>
+                  <p className="font-bold text-xl text-yellow-400">${loan.intentDeposit} <span className="text-sm font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>USDC</span></p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">{t.dueDate}</p>
-                  <p className="font-bold mt-1">{loan.dueDate.toLocaleDateString("id-ID")}</p>
+                <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.dueDate}</p>
+                  <p className="font-bold">{loan.dueDate.toLocaleDateString("id-ID")}</p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">{t.wallet}</p>
-                  <p className="font-mono text-xs mt-1 text-gray-300">{publicKey?.toString().slice(0, 14)}...</p>
+                <div className="rounded-xl p-3" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{t.wallet}</p>
+                  <p className="font-mono text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{publicKey?.toString().slice(0, 14)}...</p>
                 </div>
               </div>
               {txHash && (
                 <a href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300">
+                  className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                   🔗 {t.viewExplorer}
                 </a>
               )}
             </div>
 
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 space-y-4">
-              <p className="font-semibold">{t.repayNow}</p>
-              <div className="bg-gray-800 rounded-xl p-4 space-y-2 text-sm">
+            <div className="rounded-2xl p-6 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="font-bold">{t.repayNow}</p>
+              <div className="rounded-xl p-4 space-y-2.5 text-sm" style={{ background: "rgba(0,0,0,0.25)" }}>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">{t.principalInterest}</span>
+                  <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.principalInterest}</span>
                   <span className="font-medium">${(loan.amount + loan.amount * tier.rate / 100 * 14 / 365).toFixed(2)} USDC</span>
                 </div>
-                <div className="border-t border-gray-700 pt-2 flex justify-between">
-                  <span className="text-gray-400">{t.depositReturn}</span>
+                <div className="flex justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                  <span style={{ color: "rgba(255,255,255,0.4)" }}>{t.depositReturn}</span>
                   <span className="font-medium text-green-400">+${loan.intentDeposit} USDC</span>
                 </div>
               </div>
-              <p className="text-xs text-green-500 font-medium">→ {t.repayHint}</p>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
+              <p className="text-xs font-medium text-green-500">→ {t.repayHint}</p>
+              {error && <p className="text-red-400 text-xs">{error}</p>}
               <button onClick={handleRepay} disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-500 transition-all disabled:opacity-50">
+                className="w-full py-3 rounded-xl font-bold text-white transition-all disabled:opacity-40"
+                style={{ background: "#16a34a" }}>
                 {loading ? t.processing : t.repayNow}
               </button>
             </div>
@@ -559,27 +568,26 @@ export default function Home() {
 
         {/* SUCCESS OVERLAY */}
         {appState === "success" && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-            <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 text-center space-y-4 mx-4 max-w-sm w-full">
+          <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}>
+            <div className="rounded-2xl p-8 text-center space-y-4 mx-4 max-w-sm w-full" style={{ background: "#0f0f18", border: "1px solid rgba(34,197,94,0.3)" }}>
               <div className="text-5xl">✓</div>
-              <p className="text-2xl font-bold text-green-400">{t.success}</p>
+              <p className="text-2xl font-black text-green-400">{t.success}</p>
               {scoreGain > 0 && (
-                <div className="bg-green-900 bg-opacity-30 border border-green-800 rounded-xl p-4 space-y-1">
-                  <p className="text-green-400 font-bold text-2xl">+{scoreGain} score</p>
-                  <p className="text-gray-300 text-sm">Your credit score increased</p>
-                  <p className="text-gray-400 text-xs">New score: {score.score + scoreGain}</p>
+                <div className="rounded-xl p-4 space-y-1" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                  <p className="text-green-400 font-black text-2xl">+{scoreGain} score</p>
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Your credit score increased</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>New score: {score.score + scoreGain}</p>
                 </div>
               )}
-              <p className="text-green-300 text-sm font-medium">You unlocked higher borrowing power</p>
-              <p className="text-gray-400 text-sm">{t.depositBack}</p>
-              <p className="text-sm text-gray-400">{t.depositBack}</p>
+              <p className="text-sm font-medium text-green-300">You unlocked higher borrowing power</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{t.depositBack}</p>
               {score.tier < 3 && onTimeLeft > 0 && (
                 <p className="text-xs text-blue-400">{onTimeLeft} {t.nextTier} {nextTierData.name} (${Math.min(nextTierData.limit, DEMO_CAP)} limit)</p>
               )}
               {txHash && (
                 <a href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 text-xs text-blue-400 hover:text-blue-300">
+                  className="flex items-center justify-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                   🔗 {t.viewExplorer}
                 </a>
               )}
