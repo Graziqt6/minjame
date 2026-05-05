@@ -100,7 +100,6 @@ const TEXTS = {
     depositBack: "Deposit $2 sudah kembali ke dompetmu.",
     viewExplorer: "Lihat di Solana Explorer",
     ineligible: "Belum layak saat ini",
-    tierMax: "Kamu sudah di level tertinggi — Mitra.",
     ineligibleHint: "Riwayat dompet belum cukup.",
     whatToDo: "Yang perlu kamu lakukan:",
     tip1: "Gunakan dompetmu untuk transaksi rutin",
