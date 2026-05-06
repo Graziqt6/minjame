@@ -31,11 +31,12 @@ interface UserScore {
 }
 
 interface LoanAccount {
-  borrower: string;
+  borrower?: string;
   amount: number;
   intentDeposit: number;
-  dueDate: number;
+  dueDate: Date | number;
   repaid: boolean;
+  active?: boolean;
 }
 
 interface EligibilityResult {
