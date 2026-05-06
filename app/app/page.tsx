@@ -41,7 +41,8 @@ interface LoanAccount {
 
 interface EligibilityResult {
   eligible: boolean;
-  maxAmount: number;
+  maxAmount?: number;
+  limit?: number;
   reason?: string;
   details?: {
     layer1: boolean;
