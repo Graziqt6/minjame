@@ -1,15 +1,8 @@
 "use client";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MINJAME — page.tsx  (UI-only redesign, zero business logic changes)
-// ─────────────────────────────────────────────────────────────────────────────
-// All borrow / repay / wallet-adapter / solana.ts logic is preserved verbatim.
-// Only className strings, layout structure, and typography have been updated.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchUserScore,
   fetchActiveLoan,
@@ -19,7 +12,6 @@ import {
 import { checkEligibility } from "../lib/eligibility";
 import { TIERS } from "../lib/constants";
 
-// ─── Types (unchanged) ───────────────────────────────────────────────────────
 interface UserScore {
   score: number;
   tier: number;
@@ -54,13 +46,11 @@ interface EligibilityResult {
   };
 }
 
-// ─── Splash / Disclaimer screen ──────────────────────────────────────────────
 function SplashScreen({ onEnter }: { onEnter: () => void }) {
   const [agreed, setAgreed] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center px-6">
-      {/* Logo mark */}
       <div className="mb-8 w-16 h-16 rounded-2xl bg-[#141519] border border-white/[0.06] flex items-center justify-center shadow-xl">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
           <path d="M16 4L6 10V22L16 28L26 22V10L16 4Z" fill="#7C3AED" fillOpacity="0.15" stroke="#7C3AED" strokeWidth="1.5"/>
@@ -69,7 +59,6 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         </svg>
       </div>
 
-      {/* Headline */}
       <h1 className="text-[1.75rem] font-semibold text-white tracking-tight mb-2 text-center">
         Your first loan starts here.
       </h1>
@@ -77,7 +66,6 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         Build credit from your wallet. No documents.
       </p>
 
-      {/* Acknowledge checkbox */}
       <label className="flex items-center gap-3 cursor-pointer mb-8 group select-none">
         <div
           onClick={() => setAgreed(!agreed)}
@@ -98,7 +86,6 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         </span>
       </label>
 
-      {/* CTA */}
       <button
         onClick={onEnter}
         disabled={!agreed}
@@ -118,7 +105,6 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
   );
 }
 
-// ─── Score ring (SVG arc) ─────────────────────────────────────────────────────
 function ScoreRing({ score, max = 500 }: { score: number; max?: number }) {
   const pct = Math.min(score / max, 1);
   const r = 36;
@@ -144,7 +130,6 @@ function ScoreRing({ score, max = 500 }: { score: number; max?: number }) {
   );
 }
 
-// ─── Tier badge ───────────────────────────────────────────────────────────────
 const TIER_COLORS: Record<number, { dot: string; text: string }> = {
   0: { dot: "bg-[#6b7280]",  text: "text-[#9ca3af]"  },
   1: { dot: "bg-[#3b82f6]",  text: "text-[#93c5fd]"  },
@@ -163,14 +148,10 @@ function TierBadge({ tier }: { tier: number }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN APP
-// ─────────────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { publicKey, connected, ...walletRest } = useWallet();
   const wallet = { publicKey, connected, ...walletRest };
 
-  // ── App state ──────────────────────────────────────────────────────────────
   const [showSplash, setShowSplash]         = useState(true);
   const [userScore, setUserScore]           = useState<UserScore | null>(null);
   const [loanAccount, setLoanAccount]       = useState<LoanAccount | null>(null);
@@ -183,8 +164,10 @@ export default function Home() {
   const [txError, setTxError]               = useState<string | null>(null);
   const [loadingData, setLoadingData]       = useState(false);
   const [showIdInfo, setShowIdInfo]         = useState(false);
+  // ── NEW: countdown clock + score delta tracking ──
+  const [now, setNow]                       = useState(Date.now());
+  const [prevScore, setPrevScore]           = useState<number | null>(null);
 
-  // ── Derived ────────────────────────────────────────────────────────────────
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = eligibility?.maxAmount ?? currentTier?.limit ?? 10;
   const interestRate  = currentTier?.rate ?? 0.18;
@@ -192,6 +175,12 @@ export default function Home() {
   const totalRepay    = (amount + interest).toFixed(2);
   const intentDeposit = 2;
   const dueDate       = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+  // ── Countdown ticker ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // ── Load onchain data ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -233,7 +222,6 @@ export default function Home() {
       const txSig = await createLoan(wallet, amount);
       setBorrowSuccess({ txSig, amount });
       setStatus(null);
-      // Refresh
       const [score, loan] = await Promise.all([
         fetchUserScore(publicKey, wallet),
         fetchActiveLoan(publicKey, wallet),
@@ -255,7 +243,10 @@ export default function Home() {
     setTxError(null);
     setStatus("Awaiting wallet signature…");
     try {
+      // ── NEW: capture score before repay so we can show the delta ──
+      const scoreBeforeRepay = userScore?.score ?? null;
       const txSig = await repayLoan(wallet);
+      setPrevScore(scoreBeforeRepay);
       setRepaidSuccess({ txSig });
       setStatus(null);
       const [score, loan] = await Promise.all([
@@ -272,7 +263,6 @@ export default function Home() {
     }
   };
 
-  // ── Splash gate ────────────────────────────────────────────────────────────
   if (showSplash) {
     return <SplashScreen onEnter={() => setShowSplash(false)} />;
   }
@@ -282,14 +272,27 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center px-6">
         <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl p-10 max-w-sm w-full text-center shadow-2xl">
-          {/* Check icon */}
           <div className="w-14 h-14 bg-[#052e16] rounded-full flex items-center justify-center mx-auto mb-5">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M5 12l5 5L19 7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <h2 className="text-[1.4rem] font-semibold text-[#22c55e] mb-2">Repaid!</h2>
-          <p className="text-[0.875rem] text-white mb-1">You unlocked higher borrowing power</p>
+          <p className="text-[0.875rem] text-white mb-3">You unlocked higher borrowing power</p>
+
+          {/* ── NEW: score delta display ── */}
+          {prevScore !== null && userScore && userScore.score > prevScore && (
+            <div className="inline-flex items-center gap-2 bg-[#052e16] border border-[#22c55e]/20 rounded-lg px-3 py-1.5 mb-4">
+              <span className="text-[0.8rem] text-[#6b7280]">Score</span>
+              <span className="text-[0.8rem] text-[#6b7280]">{prevScore}</span>
+              <span className="text-[0.75rem] text-[#4b5563]">→</span>
+              <span className="text-[0.9rem] font-bold text-[#22c55e]">{userScore.score}</span>
+              <span className="text-[0.75rem] font-semibold text-[#22c55e]">
+                +{userScore.score - prevScore}
+              </span>
+            </div>
+          )}
+
           <p className="text-[0.8rem] text-[#6b7280] mb-6">
             $2 deposit has been returned to your wallet.
           </p>
@@ -305,7 +308,6 @@ export default function Home() {
             </svg>
             View on Solana Explorer
           </a>
-
           <button
             onClick={() => setRepaidSuccess(null)}
             className="mt-6 w-full h-10 rounded-xl bg-[#1c1e24] text-[#9ca3af] text-sm hover:text-white hover:bg-[#22252d] transition-all"
@@ -356,15 +358,10 @@ export default function Home() {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // MAIN LAYOUT
-  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0b0c10] text-white font-sans">
 
-      {/* ── Topbar ────────────────────────────────────────────────────────── */}
       <header className="h-14 border-b border-white/[0.05] flex items-center justify-between px-6 bg-[#0e0f14]">
-        {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg bg-[#7C3AED]/20 border border-[#7C3AED]/30 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
@@ -380,17 +377,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right side */}
         <div className="flex items-center gap-2">
-          {/* ID info button */}
           <button
             onClick={() => setShowIdInfo(!showIdInfo)}
             className="w-8 h-8 rounded-lg bg-[#1c1e24] border border-white/[0.06] text-[#6b7280] text-[0.7rem] font-semibold hover:text-white hover:border-white/10 transition-all"
           >
             ID
           </button>
-
-          {/* Wallet button — styled via global css or wallet-adapter defaults */}
           <WalletMultiButton
             style={{
               height: "32px",
@@ -405,7 +398,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── ID info popover ───────────────────────────────────────────────── */}
       {showIdInfo && (
         <div className="fixed top-16 right-6 z-50 bg-[#13141a] border border-white/[0.06] rounded-xl p-4 w-72 shadow-2xl">
           <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-wider mb-2">Program ID</p>
@@ -430,7 +422,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Pre-connect landing ──────────────────────────────────────────── */}
       {!connected && (
         <main className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-3">
@@ -443,7 +434,6 @@ export default function Home() {
             No collateral. No KYC. Build your onchain credit score.
           </p>
 
-          {/* Feature pills */}
           <div className="flex flex-col sm:flex-row gap-3 mb-10">
             {[
               { icon: "🔒", label: "No collateral required" },
@@ -474,7 +464,6 @@ export default function Home() {
         </main>
       )}
 
-      {/* ── Connected dashboard ──────────────────────────────────────────── */}
       {connected && (
         <main className="max-w-[1100px] mx-auto px-5 py-8">
           {loadingData ? (
@@ -485,9 +474,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5">
 
-              {/* ══════════════════════════════════════════════════════════
-                  LEFT — Credit Profile (HERO)
-              ══════════════════════════════════════════════════════════ */}
+              {/* ══ LEFT — Credit Profile ══ */}
               <div className="flex flex-col gap-4">
 
                 {/* Score card */}
@@ -510,7 +497,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Stats row */}
+                  {/* Stats grid — now 2x2 including repayment history */}
                   <div className="grid grid-cols-2 gap-3 mt-5">
                     <div className="bg-[#0e0f14] rounded-xl p-4">
                       <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Limit</p>
@@ -526,9 +513,23 @@ export default function Home() {
                         <span className="text-[0.75rem] font-normal text-[#6b7280] ml-0.5">%</span>
                       </p>
                     </div>
+                    {/* ── NEW: repayment history stats ── */}
+                    <div className="bg-[#0e0f14] rounded-xl p-4">
+                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Loans repaid</p>
+                      <p className="text-xl font-bold text-white">
+                        {userScore?.repaymentCount ?? 0}
+                        <span className="text-[0.75rem] font-normal text-[#6b7280] ml-1">total</span>
+                      </p>
+                    </div>
+                    <div className="bg-[#0e0f14] rounded-xl p-4">
+                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">On-time</p>
+                      <p className="text-xl font-bold text-[#22c55e]">
+                        {userScore?.onTimeCount ?? 0}
+                        <span className="text-[0.75rem] font-normal text-[#6b7280] ml-1">/ {userScore?.repaymentCount ?? 0}</span>
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Wallet address */}
                   {publicKey && (
                     <p className="mt-4 text-[0.72rem] text-[#374151] font-mono truncate">
                       {publicKey.toString()}
@@ -541,7 +542,6 @@ export default function Home() {
                   <p className="text-[0.875rem] text-[#9ca3af] leading-relaxed mb-1">
                     Your limit and rate improve as your reputation grows.
                   </p>
-                    
                   {userScore && userScore.tier >= 3 ? (
                     <p className="text-[0.8rem] text-[#22c55e]">
                       You have reached the highest level — Mitra.
@@ -603,17 +603,13 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ══════════════════════════════════════════════════════════
-                  RIGHT — Borrow or Active Loan
-              ══════════════════════════════════════════════════════════ */}
+              {/* ══ RIGHT — Borrow or Active Loan ══ */}
               <div className="flex flex-col gap-4">
 
-                {/* ── Active loan view ─────────────────────────────────── */}
+                {/* Active loan view */}
                 {loanAccount && !loanAccount.repaid && (
                   <>
-                    {/* Loan summary card */}
                     <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl p-6">
-                      {/* Header */}
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse" />
@@ -629,7 +625,6 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Grid stats */}
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div className="bg-[#0e0f14] rounded-xl p-4">
                           <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Loan Amount</p>
@@ -645,12 +640,27 @@ export default function Home() {
                             <span className="text-[0.7rem] font-normal text-[#6b7280] ml-1">USDC</span>
                           </p>
                         </div>
+
+                        {/* ── NEW: Due date with live countdown ── */}
                         <div className="bg-[#0e0f14] rounded-xl p-4">
                           <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Due Date</p>
                           <p className="text-base font-semibold text-white">
                             {new Date(loanAccount.dueDate).toLocaleDateString("id-ID")}
                           </p>
+                          {(() => {
+                            const msLeft = new Date(loanAccount.dueDate).getTime() - now;
+                            const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+                            const hoursLeft = Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const urgent = daysLeft <= 2;
+                            if (msLeft <= 0) return <p className="text-[0.7rem] text-red-400 mt-1 font-medium">Overdue</p>;
+                            return (
+                              <p className={`text-[0.7rem] mt-1 font-medium ${urgent ? "text-[#f59e0b]" : "text-[#6b7280]"}`}>
+                                {daysLeft}d {hoursLeft}h remaining
+                              </p>
+                            );
+                          })()}
                         </div>
+
                         <div className="bg-[#0e0f14] rounded-xl p-4">
                           <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Wallet</p>
                           <p className="text-[0.75rem] font-mono text-[#6b7280] truncate">
@@ -722,12 +732,11 @@ export default function Home() {
                   </>
                 )}
 
-                {/* ── Borrow view (no active loan) ─────────────────────── */}
+                {/* Borrow view */}
                 {(!loanAccount || loanAccount.repaid) && (
                   <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl p-6">
                     <h3 className="text-[0.95rem] font-semibold text-white mb-5">Borrow Now</h3>
 
-                    {/* Eligibility warning */}
                     {eligibility && !eligibility.eligible && (
                       <div className="bg-[#1c1510] border border-[#f59e0b]/20 rounded-xl px-4 py-3.5 mb-5">
                         <p className="text-[0.8rem] text-[#f59e0b] font-medium mb-1">Not eligible yet</p>
@@ -755,7 +764,6 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Amount label */}
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-[0.7rem] text-[#4b5563] uppercase tracking-widest">Amount</label>
                       <div className="flex items-center gap-1.5 bg-[#0e0f14] border border-white/[0.06] rounded-lg px-3 py-1.5">
@@ -772,7 +780,6 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Slider */}
                     <input
                       type="range"
                       min={1}
@@ -793,9 +800,8 @@ export default function Home() {
                       <span>${maxAmount}</span>
                     </div>
 
-                    {/* Quick picks */}
                     <div className="grid grid-cols-3 gap-2 mb-5">
-                      {[10, 25, maxAmount].map((v, i) =>  (
+                      {[10, 25, maxAmount].map((v, i) => (
                         <button
                           key={i}
                           onClick={() => setAmount(v)}
@@ -810,7 +816,6 @@ export default function Home() {
                       ))}
                     </div>
 
-                    {/* Summary rows */}
                     <div className="space-y-0 mb-5 bg-[#0e0f14] rounded-xl overflow-hidden">
                       {[
                         { label: "You receive",      value: `$${amount.toFixed(2)} USDC`,    color: "text-white" },
