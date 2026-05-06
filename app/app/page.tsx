@@ -648,7 +648,7 @@ export default function Home() {
                         <div className="bg-[#0e0f14] rounded-xl p-4">
                           <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Due Date</p>
                           <p className="text-base font-semibold text-white">
-                            {loanAccount.dueDate.toLocaleDateString("id-ID")}
+                            {new Date(loanAccount.dueDate).toLocaleDateString("id-ID")}
                           </p>
                         </div>
                         <div className="bg-[#0e0f14] rounded-xl p-4">
