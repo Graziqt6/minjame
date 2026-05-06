@@ -371,7 +371,7 @@ export default function Home() {
           <div>
             <span className="text-[0.875rem] font-semibold tracking-wide text-white">MINJAME</span>
             <span className="hidden sm:inline text-[0.7rem] text-[#374151] ml-2 tracking-widest uppercase">
-              Solana Devnet · No KYC · No Bank
+              Devnet
             </span>
           </div>
         </div>
@@ -537,6 +537,7 @@ export default function Home() {
                   <p className="text-[0.875rem] text-[#9ca3af] leading-relaxed mb-1">
                     Your limit and rate improve as your reputation grows.
                   </p>
+                    
                   {userScore && userScore.tier >= 3 ? (
                     <p className="text-[0.8rem] text-[#22c55e]">
                       You have reached the highest level — Mitra.
@@ -548,7 +549,6 @@ export default function Home() {
                   )}
                   <div className="mt-4 flex items-center gap-4 text-[0.72rem] text-[#374151]">
                     <span>· All data stored on-chain</span>
-                    <span>· No KYC · No Bank</span>
                   </div>
                 </div>
 
@@ -573,7 +573,7 @@ export default function Home() {
                           <div className="flex items-center gap-3">
                             <span className={`w-2 h-2 rounded-full flex-shrink-0
                               ${isCurrent ? TIER_COLORS[i].dot
-                              : isPast    ? "bg-[#22c55e]"
+                              : isPast    ? TIER_COLORS[i].dot
                               : "bg-[#1e2027]"}`}
                             />
                             <span className={`text-[0.825rem] font-medium
@@ -590,7 +590,7 @@ export default function Home() {
                             )}
                           </div>
                           <span className="text-[0.78rem] text-[#4b5563]">
-                            ${tier.limit} · {tier.rate}%
+                            ${tier.limit} · {tier.rate}% APR
                           </span>
                         </div>
                       );
