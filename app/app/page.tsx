@@ -22,10 +22,12 @@ import { TIERS } from "../lib/constants";
 // ─── Types (unchanged) ───────────────────────────────────────────────────────
 interface UserScore {
   score: number;
-  loanCount: number;
-  repaidCount: number;
-  defaultCount: number;
   tier: number;
+  repaymentCount: number;
+  onTimeCount: number;
+  loanCount?: number;
+  repaidCount?: number;
+  defaultCount?: number;
 }
 
 interface LoanAccount {
