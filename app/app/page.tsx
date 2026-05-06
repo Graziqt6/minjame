@@ -260,9 +260,12 @@ export default function Home() {
     setLoading(false);
   }
 
+  if (!entered) {
+    return <EntryScreen onEnter={() => setEntered(true)} lang={lang} />;
+  }
+
   return (
     <div className="min-h-screen text-white" style={{ background: "#0d0f1e" }}>
-      {!entered && <EntryScreen onEnter={() => setEntered(true)} lang={lang} />}
 
       {/* HEADER */}
       <header className="px-6 py-3 sticky top-0 z-40 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(9,9,15,0.85)" }}>
