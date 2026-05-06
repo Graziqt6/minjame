@@ -189,7 +189,7 @@ export default function Home() {
   const intentDeposit = 2;
   const dueDate       = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
-  // ── Load on-chain data ─────────────────────────────────────────────────────
+  // ── Load onchain data ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!connected || !publicKey) {
       setUserScore(null);
@@ -433,10 +433,10 @@ export default function Home() {
             MINJAME
           </h1>
           <p className="text-[1rem] text-[#9ca3af] mb-2">
-            On-chain credit for everyday crypto users
+            Onchain credit for everyday crypto users
           </p>
           <p className="text-[0.85rem] text-[#4b5563] mb-10">
-            No collateral. No KYC. Build your on-chain credit score.
+            No collateral. No KYC. Build your onchain credit score.
           </p>
 
           {/* Feature pills */}
@@ -444,7 +444,7 @@ export default function Home() {
             {[
               { icon: "🔒", label: "No collateral required" },
               { icon: "📋", label: "No KYC or documents" },
-              { icon: "📈", label: "Build permanent on-chain credit" },
+              { icon: "📈", label: "Build permanent onchain credit" },
             ].map((f) => (
               <div
                 key={f.label}
@@ -476,7 +476,7 @@ export default function Home() {
           {loadingData ? (
             <div className="flex items-center justify-center py-32 text-[#4b5563] text-sm gap-3">
               <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7C3AED] rounded-full animate-spin" />
-              Loading your on-chain data…
+              Loading your onchain data…
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5">
@@ -548,7 +548,7 @@ export default function Home() {
                     </p>
                   )}
                   <div className="mt-4 flex items-center gap-4 text-[0.72rem] text-[#374151]">
-                    <span>· All data stored on-chain</span>
+                    <span>· All data stored onchain</span>
                   </div>
                 </div>
 
