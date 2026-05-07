@@ -1,4 +1,5 @@
 "use client";
+import { ModeSelect } from "./mode-select";
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -167,6 +168,19 @@ export default function Home() {
   // ── NEW: countdown clock + score delta tracking ──
   const [now, setNow]                       = useState(Date.now());
   const [prevScore, setPrevScore]           = useState<number | null>(null);
+  const [lang, setLang] = useState<"en" | "id">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("minjame_lang") as "en" | "id") || "en";
+    }
+    return "en";
+  });
+  const [mode, setMode] = useState<"simulation" | "devnet" | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("minjame_mode");
+      if (saved === "simulation" || saved === "devnet") return saved;
+    }
+    return null;
+  });
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = eligibility?.maxAmount ?? currentTier?.limit ?? 10;
@@ -184,6 +198,13 @@ export default function Home() {
 
   // ── Load onchain data ─────────────────────────────────────────────────────
   useEffect(() => {
+    if (mode === "simulation") {
+      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
+      setLoanAccount(null);
+      setEligibility({ eligible: true, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } });
+      return;
+    }
+
     if (!connected || !publicKey) {
       setUserScore(null);
       setLoanAccount(null);
@@ -214,9 +235,20 @@ export default function Home() {
 
   // ── Borrow ─────────────────────────────────────────────────────────────────
   const handleBorrow = async () => {
-    if (!publicKey) return;
     setLoading(true);
     setTxError(null);
+
+    // Simulation mode — instant mock borrow
+    if (mode === "simulation") {
+      await new Promise(r => setTimeout(r, 800));
+      const mockDue = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      setLoanAccount({ amount, intentDeposit: 2, dueDate: mockDue, repaid: false });
+      setBorrowSuccess({ txSig: "simulation", amount });
+      setLoading(false);
+      return;
+    }
+
+    if (!publicKey) { setLoading(false); return; }
     setStatus("Awaiting wallet signature…");
     try {
       const txSig = await createLoan(wallet, amount);
@@ -238,9 +270,23 @@ export default function Home() {
 
   // ── Repay ──────────────────────────────────────────────────────────────────
   const handleRepay = async () => {
-    if (!publicKey || !loanAccount) return;
+    if (!loanAccount) return;
     setLoading(true);
     setTxError(null);
+
+    // Simulation mode — instant mock repay
+    if (mode === "simulation") {
+      await new Promise(r => setTimeout(r, 800));
+      const oldScore = userScore?.score ?? 120;
+      setPrevScore(oldScore);
+      setUserScore({ score: oldScore + 30, tier: Math.min((userScore?.tier ?? 0) + 0, 3), repaymentCount: (userScore?.repaymentCount ?? 0) + 1, onTimeCount: (userScore?.onTimeCount ?? 0) + 1 });
+      setLoanAccount(null);
+      setRepaidSuccess({ txSig: "simulation" });
+      setLoading(false);
+      return;
+    }
+
+    if (!publicKey) { setLoading(false); return; }
     setStatus("Awaiting wallet signature…");
     try {
       // ── NEW: capture score before repay so we can show the delta ──
@@ -265,6 +311,18 @@ export default function Home() {
 
   if (showSplash) {
     return <SplashScreen onEnter={() => setShowSplash(false)} />;
+  }
+
+  if (!mode) {
+    return (
+      <ModeSelect
+        lang="en"
+        onSelect={(selected) => {
+          setMode(selected);
+          localStorage.setItem("minjame_mode", selected);
+        }}
+      />
+    );
   }
 
   // ── Repaid success modal ───────────────────────────────────────────────────
@@ -372,18 +430,31 @@ export default function Home() {
           <div>
             <span className="text-[0.875rem] font-semibold tracking-wide text-white">MINJAME</span>
             <span className="hidden sm:inline text-[0.7rem] text-[#374151] ml-2 tracking-widest uppercase">
-              Devnet
+              {mode === "simulation" ? "Simulation" : "Devnet"}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowIdInfo(!showIdInfo)}
-            className="w-8 h-8 rounded-lg bg-[#1c1e24] border border-white/[0.06] text-[#6b7280] text-[0.7rem] font-semibold hover:text-white hover:border-white/10 transition-all"
-          >
-            ID
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowIdInfo(!showIdInfo)}
+              className="h-8 px-3 rounded-lg bg-[#1c1e24] border border-white/[0.06] text-[#9ca3af] text-[0.7rem] font-semibold hover:text-white hover:border-white/10 transition-all flex items-center gap-1"
+            >
+              {lang === "en" ? "EN" : "ID"}
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
+            </button>
+            {showIdInfo && (
+              <div className="absolute top-10 right-0 z-50 bg-[#13141a] border border-white/[0.06] rounded-xl overflow-hidden shadow-2xl w-28">
+                {["en", "id"].map((l) => (
+                  <button key={l} onClick={() => { setLang(l as "en"|"id"); localStorage.setItem("minjame_lang", l); setShowIdInfo(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${lang === l ? "text-white bg-white/[0.06]" : "text-[#6b7280] hover:text-white hover:bg-white/[0.04]"}`}>
+                    {l === "en" ? "🇬🇧 English" : "🇮🇩 Indonesia"}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <WalletMultiButton
             style={{
               height: "32px",
@@ -398,29 +469,6 @@ export default function Home() {
         </div>
       </header>
 
-      {showIdInfo && (
-        <div className="fixed top-16 right-6 z-50 bg-[#13141a] border border-white/[0.06] rounded-xl p-4 w-72 shadow-2xl">
-          <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-wider mb-2">Program ID</p>
-          <p className="text-[0.75rem] text-[#9ca3af] font-mono break-all leading-relaxed">
-            86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4
-          </p>
-          <div className="mt-3 pt-3 border-t border-white/[0.05]">
-            <a
-              href="https://explorer.solana.com/address/86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4?cluster=devnet"
-              target="_blank" rel="noreferrer"
-              className="text-[0.75rem] text-[#7C3AED] hover:text-purple-300 transition-colors"
-            >
-              View on Explorer →
-            </a>
-          </div>
-          <button
-            onClick={() => setShowIdInfo(false)}
-            className="absolute top-3 right-3 w-6 h-6 rounded-md bg-[#1c1e24] text-[#6b7280] text-xs hover:text-white flex items-center justify-center"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {!connected && (
         <main className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 text-center">

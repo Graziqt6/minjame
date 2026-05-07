@@ -22,7 +22,7 @@ export async function checkEligibility(walletAddress: string): Promise<Eligibili
     const signatures = await connection.getSignaturesForAddress(pubkey, { limit: 100 });
     
     if (signatures.length === 0) {
-      return { eligible: false, limit: 5, reason: "Dompet belum pernah digunakan.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
+      return { eligible: false, limit: 5, reason: "This wallet has never been used.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
     }
 
     // Wallet age check (21 days)
@@ -32,7 +32,7 @@ export async function checkEligibility(walletAddress: string): Promise<Eligibili
     
     if (walletAgeDays < 21) {
       const daysLeft = Math.ceil(21 - walletAgeDays);
-      return { eligible: false, limit: 5, reason: `Dompetmu baru ${Math.floor(walletAgeDays)} hari. Coba lagi dalam ${daysLeft} hari.`, signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
+      return { eligible: false, limit: 5, reason: `Wallet is only ${Math.floor(walletAgeDays)} days old. Try again in ${daysLeft} days.`, signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
     }
 
     // Transactions on 3+ separate days
@@ -43,7 +43,7 @@ export async function checkEligibility(walletAddress: string): Promise<Eligibili
     );
     
     if (txDays.size < 3) {
-      return { eligible: false, limit: 5, reason: "Aktivitas dompet terlalu terbatas. Gunakan dompetmu lebih dulu.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
+      return { eligible: false, limit: 5, reason: "Wallet activity is too limited. Use your wallet more first.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
     }
 
     const layer1 = true;
@@ -106,6 +106,6 @@ export async function checkEligibility(walletAddress: string): Promise<Eligibili
 
   } catch (error) {
     console.error("Eligibility check error:", error);
-    return { eligible: false, limit: 5, reason: "Gagal membaca dompet. Coba lagi.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
+    return { eligible: false, limit: 5, reason: "Failed to read wallet. Try again.", signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } };
   }
 }
