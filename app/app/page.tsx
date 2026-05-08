@@ -240,7 +240,7 @@ export default function Home() {
     if (mode === "simulation") {
       setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
       setLoanAccount(null);
-      setEligibility({ eligible: true, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } });
+      setEligibility({ eligible: true, limit: 50 });
       return;
     }
 
