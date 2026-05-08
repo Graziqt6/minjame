@@ -1,4 +1,41 @@
 "use client";
+
+const T = {
+  en: {
+    level: "Level", limit: "Limit", interestYear: "Interest / Year",
+    score: "Score", amount: "Amount", borrowNow: "Borrow Now",
+    repayNow: "Repay Now", activeLoan: "Active Loan",
+    tierProgression: "Tier Progression", processing: "Processing…",
+    increases: "Increases with on-time repayments",
+    yourLimit: "Your limit and rate improve as your reputation grows.",
+    repayUnlock: "Repay on time to unlock better terms.",
+    allData: "All data stored onchain",
+    loansRepaid: "Loans Repaid", onTime: "On-Time",
+    dueDate: "Due Date", daysLeft: "Days Left",
+    totalRepay: "Total to Repay", depositReturn: "Deposit Returned",
+    youReceive: "You receive", intentDeposit: "Intent deposit",
+    totalRepayment: "Total repayment", interest: "Interest",
+    awaitingSig: "Awaiting wallet signature…",
+    highest: "You have reached the highest level — Mitra.",
+  },
+  id: {
+    level: "Level", limit: "Limit", interestYear: "Bunga / Tahun",
+    score: "Skor", amount: "Jumlah", borrowNow: "Pinjam Sekarang",
+    repayNow: "Bayar Sekarang", activeLoan: "Pinjaman Aktif",
+    tierProgression: "Progres Tier", processing: "Memproses…",
+    increases: "Naik saat bayar tepat waktu",
+    yourLimit: "Limit dan bunga membaik seiring reputasimu.",
+    repayUnlock: "Bayar tepat waktu untuk syarat lebih baik.",
+    allData: "Semua data tersimpan onchain",
+    loansRepaid: "Pinjaman Dibayar", onTime: "Tepat Waktu",
+    dueDate: "Jatuh Tempo", daysLeft: "Sisa Hari",
+    totalRepay: "Total Bayar", depositReturn: "Deposit Kembali",
+    youReceive: "Kamu terima", intentDeposit: "Deposit niat",
+    totalRepayment: "Total pembayaran", interest: "Bunga",
+    awaitingSig: "Menunggu tanda tangan dompet…",
+    highest: "Kamu sudah di level tertinggi — Mitra.",
+  },
+};
 import { ModeSelect } from "./mode-select";
 
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -125,7 +162,7 @@ function ScoreRing({ score, max = 500 }: { score: number; max?: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold text-white leading-none">{score}</span>
-        <span className="text-[0.65rem] text-[#6b7280] mt-0.5 tracking-wider uppercase">Score</span>
+        <span className="text-[0.65rem] text-[#6b7280] mt-0.5 tracking-wider uppercase">"Score"</span>
       </div>
     </div>
   );
@@ -168,12 +205,14 @@ export default function Home() {
   // ── NEW: countdown clock + score delta tracking ──
   const [now, setNow]                       = useState(Date.now());
   const [prevScore, setPrevScore]           = useState<number | null>(null);
+  // translations
   const [lang, setLang] = useState<"en" | "id">(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("minjame_lang") as "en" | "id") || "en";
     }
     return "en";
   });
+  const t = T[lang];
   const [mode, setMode] = useState<"simulation" | "devnet" | null>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("minjame_mode");
@@ -249,7 +288,7 @@ export default function Home() {
     }
 
     if (!publicKey) { setLoading(false); return; }
-    setStatus("Awaiting wallet signature…");
+    setStatus(t.awaitingSig);
     try {
       const txSig = await createLoan(wallet, amount);
       setBorrowSuccess({ txSig, amount });
@@ -287,7 +326,7 @@ export default function Home() {
     }
 
     if (!publicKey) { setLoading(false); return; }
-    setStatus("Awaiting wallet signature…");
+    setStatus(t.awaitingSig);
     try {
       // ── NEW: capture score before repay so we can show the delta ──
       const scoreBeforeRepay = userScore?.score ?? null;
@@ -341,7 +380,7 @@ export default function Home() {
           {/* ── NEW: score delta display ── */}
           {prevScore !== null && userScore && userScore.score > prevScore && (
             <div className="inline-flex items-center gap-2 bg-[#052e16] border border-[#22c55e]/20 rounded-lg px-3 py-1.5 mb-4">
-              <span className="text-[0.8rem] text-[#6b7280]">Score</span>
+              <span className="text-[0.8rem] text-[#6b7280]">{t.score}</span>
               <span className="text-[0.8rem] text-[#6b7280]">{prevScore}</span>
               <span className="text-[0.75rem] text-[#4b5563]">→</span>
               <span className="text-[0.9rem] font-bold text-[#22c55e]">{userScore.score}</span>
@@ -468,6 +507,27 @@ export default function Home() {
           />
         </div>
       </header>
+      {/* Mode banner */}
+      <div className={`w-full py-1.5 px-4 flex items-center justify-between text-xs ${mode === "simulation" ? "bg-yellow-500/10 border-b border-yellow-500/20" : "bg-purple-500/10 border-b border-purple-500/20"}`}>
+        <div className="flex items-center gap-2 max-w-5xl mx-auto w-full justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`w-1.5 h-1.5 rounded-full ${mode === "simulation" ? "bg-yellow-400" : "bg-purple-400"}`} />
+            <span className={mode === "simulation" ? "text-yellow-400" : "text-purple-400"}>
+              {mode === "simulation" ? "🎮 Simulation Mode — no real transactions" : "⛓️ Devnet Mode — real on-chain transactions"}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const next = mode === "simulation" ? "devnet" : "simulation";
+              setMode(next);
+              localStorage.setItem("minjame_mode", next);
+            }}
+            className={`text-[0.7rem] px-2.5 py-1 rounded-md border transition-all ${mode === "simulation" ? "border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10" : "border-purple-500/30 text-purple-400 hover:bg-purple-500/10"}`}
+          >
+            {mode === "simulation" ? "Switch to Devnet →" : "Switch to Simulation →"}
+          </button>
+        </div>
+      </div>
 
 
       {!connected && (
@@ -530,7 +590,7 @@ export default function Home() {
                   <div className="flex items-start gap-5">
                     <ScoreRing score={userScore?.score ?? 0} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-widest mb-1.5">Level</p>
+                      <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-widest mb-1.5">{t.level}</p>
                       <div className="flex items-center gap-2.5 mb-1">
                         <h2 className="text-2xl font-bold text-white leading-none">
                           {currentTier?.name ?? "Baru"}
@@ -540,7 +600,7 @@ export default function Home() {
                         </span>
                       </div>
                       <p className="text-[0.78rem] text-[#6b7280] leading-relaxed">
-                        Increases with on-time repayments
+                        {t.increases}
                       </p>
                     </div>
                   </div>
@@ -548,14 +608,14 @@ export default function Home() {
                   {/* Stats grid — now 2x2 including repayment history */}
                   <div className="grid grid-cols-2 gap-3 mt-5">
                     <div className="bg-[#0e0f14] rounded-xl p-4">
-                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Limit</p>
+                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">{t.limit}</p>
                       <p className="text-xl font-bold text-white">
                         ${maxAmount}
                         <span className="text-[0.75rem] font-normal text-[#6b7280] ml-1">USDC</span>
                       </p>
                     </div>
                     <div className="bg-[#0e0f14] rounded-xl p-4">
-                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Interest / Year</p>
+                      <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">{t.interestYear}</p>
                       <p className="text-xl font-bold text-white">
                         {(interestRate).toFixed(0)}
                         <span className="text-[0.75rem] font-normal text-[#6b7280] ml-0.5">%</span>
@@ -588,19 +648,19 @@ export default function Home() {
                 {/* Progress nudge */}
                 <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl px-6 py-5">
                   <p className="text-[0.875rem] text-[#9ca3af] leading-relaxed mb-1">
-                    Your limit and rate improve as your reputation grows.
+                    {t.yourLimit}
                   </p>
                   {userScore && userScore.tier >= 3 ? (
                     <p className="text-[0.8rem] text-[#22c55e]">
-                      You have reached the highest level — Mitra.
+                      {t.highest}
                     </p>
                   ) : (
                     <p className="text-[0.8rem] text-[#7C3AED]">
-                      Repay on time to unlock better terms.
+                      {t.repayUnlock}
                     </p>
                   )}
                   <div className="mt-4 flex items-center gap-4 text-[0.72rem] text-[#374151]">
-                    <span>· All data stored onchain</span>
+                    <span>· {t.allData}</span>
                   </div>
                 </div>
 
@@ -661,7 +721,7 @@ export default function Home() {
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse" />
-                          <h3 className="text-[0.95rem] font-semibold text-white">Active Loan</h3>
+                          <h3 className="text-[0.95rem] font-semibold text-white">{t.activeLoan}</h3>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[0.65rem] bg-[#0e0f14] border border-white/[0.06] text-[#6b7280] px-2 py-1 rounded-md uppercase tracking-wider">
@@ -691,7 +751,7 @@ export default function Home() {
 
                         {/* ── NEW: Due date with live countdown ── */}
                         <div className="bg-[#0e0f14] rounded-xl p-4">
-                          <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">Due Date</p>
+                          <p className="text-[0.65rem] text-[#4b5563] uppercase tracking-widest mb-1.5">{t.dueDate}</p>
                           <p className="text-base font-semibold text-white">
                             {new Date(loanAccount.dueDate).toLocaleDateString("id-ID")}
                           </p>
@@ -732,7 +792,7 @@ export default function Home() {
 
                     {/* Repay card */}
                     <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl p-6">
-                      <h3 className="text-[0.95rem] font-semibold text-white mb-5">Repay Now</h3>
+                      <h3 className="text-[0.95rem] font-semibold text-white mb-5">{t.repayNow}</h3>
 
                       <div className="space-y-2 mb-5">
                         <div className="flex justify-between items-center py-2.5 border-b border-white/[0.04]">
@@ -774,7 +834,7 @@ export default function Home() {
                             : "bg-[#16a34a] hover:bg-[#15803d] text-white shadow-lg shadow-green-900/25 cursor-pointer"
                           }`}
                       >
-                        {loading ? "Processing…" : "Repay Now"}
+                        {loading ? t.processing : "Repay Now"}
                       </button>
                     </div>
                   </>
@@ -783,7 +843,7 @@ export default function Home() {
                 {/* Borrow view */}
                 {(!loanAccount || loanAccount.repaid) && (
                   <div className="bg-[#13141a] border border-white/[0.06] rounded-2xl p-6">
-                    <h3 className="text-[0.95rem] font-semibold text-white mb-5">Borrow Now</h3>
+                    <h3 className="text-[0.95rem] font-semibold text-white mb-5">{t.borrowNow}</h3>
 
                     {eligibility && !eligibility.eligible && (
                       <div className="bg-[#1c1510] border border-[#f59e0b]/20 rounded-xl px-4 py-3.5 mb-5">
@@ -813,7 +873,7 @@ export default function Home() {
                     )}
 
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-[0.7rem] text-[#4b5563] uppercase tracking-widest">Amount</label>
+                      <label className="text-[0.7rem] text-[#4b5563] uppercase tracking-widest">{t.amount}</label>
                       <div className="flex items-center gap-1.5 bg-[#0e0f14] border border-white/[0.06] rounded-lg px-3 py-1.5">
                         <span className="text-[0.75rem] text-[#4b5563]">$</span>
                         <input
@@ -915,7 +975,7 @@ export default function Home() {
                           : "bg-[#7C3AED] hover:bg-[#6d28d9] text-white shadow-lg shadow-purple-900/25 cursor-pointer"
                         }`}
                     >
-                      {loading ? "Processing…" : `Take Loan · $${amount} USDC`}
+                      {loading ? t.processing : `Take Loan · $${amount} USDC`}
                     </button>
                   </div>
                 )}
