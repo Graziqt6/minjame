@@ -1,87 +1,187 @@
 # MINJAME
 
-**Pinjaman pertamamu. Tanpa jaminan. Tanpa bank.**
+> People with wallets still cannot access credit.
 
-Live: https://minjame.vercel.app
-Program ID: 86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4
-Explorer: https://explorer.solana.com/address/86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4?cluster=devnet
-GitHub: https://github.com/Graziqt6/minjame
+Millions of Indonesians use crypto daily — airdrops, stablecoins, DeFi. They have wallets. They have funds. But every lending protocol requires more collateral than they want to borrow.
+
+MINJAME fixes that. First loan with no collateral. Build a credit record from your wallet. Get better terms every cycle.
+
+🌐 **[minjame.vercel.app](https://minjame.vercel.app)** &nbsp;·&nbsp; Solana Devnet &nbsp;·&nbsp; DeFi Track — Superteam Indonesia 2026
 
 ---
 
-## The Problem
+## The User
 
-60 million Indonesians have no access to formal credit. Not because they are broke — because they are invisible to the system. The alternative is pinjol: predatory lenders charging 0.4% per day with no path to ever getting better terms.
+> Aldi sells resell sneakers in Yogyakarta. He has $40 USDC and a Phantom wallet. He needs $30 for a restock tonight. His bank won't talk to him. Pinjol charges 0.4% per day. MINJAME gives him $10. He repays in a week. His limit grows.
 
-For crypto-active Indonesians — people who already have wallets and stablecoins — there is still no borrowing option that fits their reality.
+This is the actual user. Not "the unbanked" in theory — crypto-active Indonesian adults who already have wallets but zero access to fair credit.
 
-## What MINJAME Does
+---
 
-MINJAME is an on-chain micro-lending protocol on Solana. It gives users their first loan with no collateral and no paperwork, then builds a permanent credit record from their repayment behavior.
+## Why Now?
 
-The better you behave, the cheaper you borrow.
+Southeast Asia has some of the fastest-growing crypto adoption in the world. Indonesia alone has 17M+ registered crypto users. Stablecoin usage is rising. Wallet ownership is growing faster than banking access.
+
+But the credit infrastructure hasn't caught up. The informal economy runs on cash and trust — and there's no way to carry that trust into DeFi.
+
+MINJAME is the infrastructure layer that changes that.
+
+---
 
 ## How It Works
 
-1. Connect your Phantom wallet
-2. The app runs a 3-layer wallet behavior check (no KYC, no documents)
-3. Pay a refundable $2 intent deposit — returned when you repay
-4. Borrow $5 or $10 USDC for 14 days at 18% APR
-5. Repay on time → score increases → better terms on the next loan
+1. **Connect wallet** — eligibility runs automatically. No KYC, no forms.
+2. **Pass check** — get a borrow limit based on wallet history. $5–$10 to start.
+3. **Pay $2 intent deposit** — refunded when you repay. Not a fee. Proof of commitment.
+4. **Receive your loan** — USDC lands in your wallet via real Solana transaction.
+5. **Repay on time** — score increases, rate drops, limit grows.
+6. **Your credit record lives on Solana** — public, permanent, readable by any protocol.
 
-## The Intent Deposit
+---
 
-The $2 intent deposit is not a fee. It is a commitment device. Honest borrowers get it back in full when they repay. If you default, you lose $2 — and your wallet is flagged. This single mechanic makes the zero-collateral first loan economically defensible without KYC.
+## Try It
 
-## The Credit Score
+### Simulation Mode
+No wallet needed. No setup. Just open the app and walk through the full borrowing flow instantly.
 
-Your score is stored in a public Solana program account at address:
-86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4
+Simulation is not a fake demo — it's an interactive product walkthrough that shows the exact experience a real user would have.
 
-It belongs to your wallet — not to MINJAME. Any other protocol can read it. If MINJAME shuts down tomorrow, your score still exists on-chain. This is what makes it infrastructure, not just an app.
+### Devnet Mode
+Connect a Phantom wallet (set to Devnet), get USDC from [faucet.circle.com](https://faucet.circle.com), and run real Solana transactions.
 
-## Eligibility System (No KYC)
+**For judges:** Start with Simulation for an instant overview. Switch to Devnet to verify the contract is live.
 
-The app reads your public wallet history and runs three layers of checks:
+---
 
-**Layer 1 — Basic Filter**
-Wallet age at least 21 days, transactions spread across 3+ separate days, evidence of stablecoin holding.
+## Screens
 
-**Layer 2 — Human Signal**
-Transaction timing spread across different hours of the day, outbound transfers to multiple different addresses.
+| Entry | Dashboard | Borrow |
+|-------|-----------|--------|
+| ![Entry](docs/entry.png) | ![Dashboard](docs/dashboard.png) | ![Borrow](docs/borrow.png) |
 
-**Layer 3 — Financial Intent**
-At least one of: any transaction above $3 in value, balance held above $5 for consecutive days, interaction with DeFi protocols, or transfer to a known exchange address.
+| Active Loan | Repaid |
+|-------------|--------|
+| ![Loan](docs/loan.png) | ![Success](docs/success.png) |
 
-Pass all three layers: $10 limit. Pass Layer 1 only: $5 limit. Fail: clear explanation of what to fix and when to return.
+*(Screenshots in /docs folder)*
+
+---
+
+## Why Repay?
+
+**The deposit.** You lock $2 before receiving funds. Default = lose $2 immediately.
+
+**The score.** Default resets your tier to zero. At Tier 2, you have $150 access at 9% APR. Reset means $10 at 18%. That compounding loss outweighs any gain from keeping a small loan.
+
+**The record.** Your score is stored on Solana permanently. A defaulted wallet is blacklisted. For anyone who plans to stay in the ecosystem, that's a real cost.
+
+The protocol absorbs ~20% first-loan defaults and still breaks even. The math is intentional.
+
+---
 
 ## Tier System
 
-| Tier | Name | Collateral | Limit | Rate |
+| Tier | Name | Repayments | Limit | Rate |
 |------|------|------------|-------|------|
-| 0 | Baru | None (first loan) | $10 | 18% APR |
-| 1 | Terpercaya | 120% | $75 | 13% APR |
-| 2 | Andalan | 100% | $200 | 9% APR |
-| 3 | Mitra | 75% | $500 | 6% APR |
+| 0 | Baru | First loan | $10 | 18% APR |
+| 1 | Terpercaya | 3 on-time | $50 | 13% APR |
+| 2 | Andalan | 8 on-time | $150 | 9% APR |
+| 3 | Mitra | 15 on-time | $500 | 6% APR |
+
+Only on-time repayments advance your tier. Enforced by the smart contract.
+
+---
+
+## Eligibility (No KYC)
+
+The app reads your public wallet history and checks three layers:
+
+- **Basic** — wallet age, activity spread, stablecoin history
+- **Behavioral** — time patterns, address diversity
+- **Financial intent** — real transfers, DeFi usage, CEX interaction
+
+All computed client-side from public Solana RPC. No server. No database. No permission required.
+
+---
+
+## What Makes MINJAME Different
+
+**vs TrueFi / Maple** — those serve institutional borrowers with governance-based credit. MINJAME serves first-time small borrowers in emerging markets.
+
+**vs Goldfinch** — Goldfinch requires off-chain credit scoring and human auditors. MINJAME's eligibility is fully on-chain and permissionless.
+
+**vs standard DeFi lending** — every other protocol requires more collateral than you want to borrow. MINJAME inverts that for the first loan.
+
+The focus is a specific, underserved user — not a generic lending primitive.
+
+---
+
+## Infrastructure Angle
+
+Your MINJAME score is stored in a public Solana account at address derived from your wallet. Any protocol can read it.
+
+A future payroll app, gig marketplace, or lending protocol could read a MINJAME score directly and offer better terms to trusted wallets — without asking MINJAME for permission.
+
+This is credit infrastructure, not just a lending app.
+
+---
 
 ## Why Solana
 
-Transaction fees below $0.01 make micro-loans economically viable. A $5 loan on Ethereum costs more in gas than the loan itself. Solana is the only L1 where this works at this scale.
+Sub-cent fees make micro-loans viable. A $10 loan on Ethereum costs more in gas than the loan itself.
 
-## Stack
+Sub-second finality means the experience feels instant — important when competing with apps like Kredivo and Akulaku.
 
-- Smart Contract: Anchor (Rust) — Solana Devnet
-- Frontend: Next.js + Tailwind CSS
-- Wallet: Phantom via @solana/wallet-adapter
-- Eligibility: Off-chain, reads public Solana RPC data
+Public accounts mean scores are genuinely portable. No oracle, no API, no trust in MINJAME.
 
-## Project Structure
+---
 
-- /program — Anchor smart contract (createLoan, repayLoan, UserScore, LoanAccount)
-- /app — Next.js frontend
-- /app/lib/eligibility.ts — 3-layer eligibility engine (off-chain)
-- /app/lib/constants.ts — Program ID, tier config, network settings
+## Architecture
 
-## Track
+```
+/program    — Anchor smart contract (Rust)
+/app        — Next.js frontend
+/app/lib/eligibility.ts   — 3-layer eligibility engine (off-chain)
+/app/lib/solana.ts        — Raw web3.js transaction builder
+/app/lib/constants.ts     — Program ID, tier config, vault addresses
+```
 
-DeFi — Superteam Indonesia Frontier Hackathon 2026
+Two Solana accounts per user:
+- `LoanAccount` — active loan state
+- `UserScore` — permanent credit record (public, composable)
+
+---
+
+## Future Expansion
+
+- **Sybil resistance** — current system raises cost of wallet farming. Full resistance needs ZK identity or social attestation.
+- **LP pool** — vault is manually seeded for demo. Architecture supports permissionless LP deposits.
+- **Auto-liquidation** — late repayment is score-penalized today. A keeper bot handles enforcement in production.
+
+These are next phases, not gaps.
+
+---
+
+## Run Locally
+
+```bash
+cd app && npm install && npm run dev -- --webpack
+```
+
+Set Phantom to Devnet. Get test USDC at [faucet.circle.com](https://faucet.circle.com).
+
+---
+
+## Demo
+
+| | |
+|--|--|
+| 🌐 Live app | [minjame.vercel.app](https://minjame.vercel.app) |
+| 📦 Program | `86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4` |
+| 🔗 Explorer | [View on Solana Explorer](https://explorer.solana.com/address/86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4?cluster=devnet) |
+| 🎥 Demo video | *(coming soon)* |
+| 💻 GitHub | [Graziqt6/minjame](https://github.com/Graziqt6/minjame) |
+
+---
+
+*This already works. Now it needs scale.*
