@@ -2,7 +2,7 @@
 
 > People with wallets still cannot access credit.
 
-Millions of Indonesians use crypto daily — airdrops, stablecoins, DeFi. They have wallets. They have funds. But every lending protocol requires more collateral than they want to borrow.
+Millions of Indonesians use crypto daily airdrops, stablecoins, DeFi. They have wallets. They have funds. But every lending protocol requires more collateral than they want to borrow.
 
 MINJAME fixes that. First loan with no collateral. Build a credit record from your wallet. Get better terms every cycle.
 
@@ -14,9 +14,9 @@ MINJAME fixes that. First loan with no collateral. Build a credit record from yo
 
 > Aldi sells resell sneakers in Yogyakarta. He has $40 USDC and a Phantom wallet. He needs $30 for a restock tonight. His bank won't talk to him. Pinjol charges 0.4% per day. MINJAME gives him $10. He repays in a week. His limit grows.
 
-This is the actual user. Not "the unbanked" in theory — crypto-active Indonesian adults who already have wallets but zero access to fair credit.
+This is the actual user. Not "the unbanked" in theory cryptoactive Indonesian adults who already have wallets but zero access to fair credit.
 
----
+-
 
 ## Why Now?
 
@@ -44,7 +44,7 @@ MINJAME is the infrastructure layer that changes that.
 ### Simulation Mode
 No wallet needed. No setup. Just open the app and walk through the full borrowing flow instantly.
 
-Simulation is not a fake demo — it's an interactive product walkthrough that shows the exact experience a real user would have.
+Simulation is not a fake demo it's an interactive product walkthrough that shows the exact experience a real user would have.
 
 ### Devnet Mode
 Connect a Phantom wallet (set to Devnet), get USDC from [faucet.circle.com](https://faucet.circle.com), and run real Solana transactions.
