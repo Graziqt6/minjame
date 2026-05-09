@@ -22,7 +22,7 @@ This is the actual user. Not "the unbanked" in theory cryptoactive Indonesian ad
 
 Southeast Asia has some of the fastest-growing crypto adoption in the world. Indonesia alone has 17M+ registered crypto users. Stablecoin usage is rising. Wallet ownership is growing faster than banking access.
 
-But the credit infrastructure hasn't caught up. The informal economy runs on cash and trust — and there's no way to carry that trust into DeFi.
+But the credit infrastructure hasn't caught up. The informal economy runs on cash and trust and there's no way to carry that trust into DeFi.
 
 MINJAME is the infrastructure layer that changes that.
 
