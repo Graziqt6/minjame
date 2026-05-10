@@ -145,7 +145,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
       </section>
 
       <div id="stats" style={{ borderTop:"1px solid rgba(255,255,255,0.07)", borderBottom:"1px solid rgba(255,255,255,0.07)", padding:"32px 48px", display:"grid", gridTemplateColumns:"repeat(4,1fr)", background:"#0E1225" }}>
-        {[{num:"$5",label:"Starting loan, no collateral"},{num:"18%",label:"APR, drops as you grow"},{num:"14 days",label:"Loan term, pay and repeat"},{num:"$2",label:"Intent deposit — fully refunded"}].map((s,i,arr) => (
+        {[{num:"$10",label:"Starting loan, no collateral"},{num:"18%",label:"APR from loan size"},{num:"14 days",label:"Loan term, pay and repeat"},{num:"$2",label:"Intent deposit — fully refunded"}].map((s,i,arr) => (
           <div key={s.num} style={{ textAlign:"center", padding:"0 24px", borderRight: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
             <span style={{ fontFamily:"'Syne',sans-serif", fontSize:32, fontWeight:700, color:"#8B5CF6", display:"block" }}>{s.num}</span>
             <div style={{ fontSize:13, color:"#8B8FA8", marginTop:4 }}>{s.label}</div>
@@ -213,7 +213,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
               {icon:"📈",title:"Score that is yours",body:"Your credit score lives in a public Solana account. It belongs to your wallet — not MINJAME. Any protocol can read it, forever."},
               {icon:"⚡",title:"Solana makes it viable",body:"Fees below $0.01 make micro-loans real. A $5 loan on Ethereum costs more in gas than the loan itself."},
               {icon:"🔒",title:"The $2 commitment",body:"The intent deposit is not a fee — it is a signal. It makes zero-collateral lending defensible without punishing honest borrowers."},
-              {icon:"🚀",title:"Better terms every time",body:"Tier 0 starts at 18% APR. Repay consistently and unlock $500 loans at 6% APR. The only path that gets cheaper."},
+              {icon:"🚀",title:"Better terms every time",body:"Repay on time, your tier rises, your limit grows. APR is always determined by how much you borrow — not who you are."},
               {icon:"🌐",title:"Infrastructure, not an app",body:"MINJAME could shut down tomorrow and your credit score still exists on Solana. You own your reputation."},
             ].map(a => (
               <div key={a.title} style={{ background:"#111528", border:"1px solid rgba(255,255,255,0.07)", borderRadius:20, padding:32 }}>
@@ -230,7 +230,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ fontSize:12, fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", color:"#6C35E8", marginBottom:16 }}>Tier System</div>
           <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:"clamp(28px,4vw,48px)", fontWeight:700, lineHeight:1.1, letterSpacing:"-0.02em", marginBottom:16 }}>The better you behave,<br />the more you can borrow</h2>
-          <p style={{ fontSize:17, color:"#8B8FA8", lineHeight:1.75, maxWidth:560, fontWeight:300, marginBottom:60 }}>Every loan repaid on time moves you up. Four tiers, each unlocks more capital at a lower rate.</p>
+          <p style={{ fontSize:17, color:"#8B8FA8", lineHeight:1.75, maxWidth:560, fontWeight:300, marginBottom:60 }}>Every loan repaid on time moves you up. Five tiers, each unlocks higher borrowing capacity.</p>
           <table style={{ width:"100%", borderCollapse:"collapse", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, overflow:"hidden" }}>
             <thead>
               <tr style={{ background:"#111528" }}>
@@ -312,7 +312,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
           <img src="/logo.png" alt="MINJAME" style={{ width:28, height:28, objectFit:"contain" }} />
           <span style={{ fontSize:14, fontWeight:600, color:"#8B8FA8" }}>MINJAME</span>
         </div>
-        <p style={{ fontSize:13, color:"#555A72" }}>Built on Solana · DeFi Track</p>
+        <p style={{ fontSize:13, color:"#555A72" }}>Built on Solana</p>
         <div style={{ display:"flex", gap:24 }}>
           <a href="https://github.com/Graziqt6/minjame" target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B8FA8", textDecoration:"none" }}>GitHub</a>
           <a href="https://explorer.solana.com/address/86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4?cluster=devnet" target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B8FA8", textDecoration:"none" }}>Explorer</a>
