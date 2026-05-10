@@ -376,13 +376,7 @@ export default function Home() {
     return "en";
   });
   const t = T[lang];
-  const [mode, setMode] = useState<"simulation" | "devnet">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("minjame_mode");
-      if (saved === "simulation" || saved === "devnet") return saved;
-    }
-    return "simulation";
-  });
+  const [mode, setMode] = useState<"simulation" | "devnet">("simulation");
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
@@ -535,7 +529,7 @@ export default function Home() {
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
             {(["simulation","devnet"] as const).map(m => (
-              <button key={m} onClick={() => { if (m === "devnet") return; setMode(m); localStorage.setItem("minjame_mode", m); }}
+              <button key={m} onClick={() => { if (m === "devnet") return; setMode(m); }}
                 style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, border:"none", fontFamily:"inherit", transition:"all 0.2s",
                   cursor: m === "devnet" ? "not-allowed" : "pointer",
                   opacity: m === "devnet" ? 0.35 : 1,
