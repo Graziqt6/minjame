@@ -2,7 +2,7 @@
 
 > People with wallets still cannot access credit.
 
-Millions of Indonesians use crypto daily — airdrops, stablecoins, DeFi. They have wallets. They have funds. But every lending protocol requires more collateral than they want to borrow.
+Millions of Indonesians use crypto daily airdrops, stablecoins, DeFi. They have wallets. They have funds. But every lending protocol requires more collateral than they want to borrow.
 
 MINJAME fixes that. First loan with no collateral. Build a credit record from your wallet. Get better terms every cycle.
 
@@ -14,7 +14,7 @@ MINJAME fixes that. First loan with no collateral. Build a credit record from yo
 
 > Aldi sells resell sneakers in Yogyakarta. He has $40 USDC and a Phantom wallet. He needs $30 for a restock tonight. His bank won't talk to him. Pinjol charges 0.4% per day. MINJAME gives him $10. He repays in a week. His limit grows.
 
-This is the actual user — not "the unbanked" in theory. Crypto-active Indonesian adults who already have wallets but zero access to fair credit.
+This is the actual user not "the unbanked" in theory. Crypto active Indonesian adults who already have wallets but zero access to fair credit.
 
 ---
 
