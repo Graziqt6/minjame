@@ -603,12 +603,29 @@ export default function Home() {
               <p style={{ fontSize:15, color:"#8B8FA8", maxWidth:420, lineHeight:1.7 }}>{eligibility.reason ?? "Your wallet history doesn't meet the minimum criteria yet."}</p>
               <div style={{ background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, padding:"20px 28px", maxWidth:400, width:"100%", textAlign:"left" }}>
                 <p style={{ fontSize:12, color:"#555A72", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:12 }}>Eligibility Check</p>
-                {eligibility.signals && Object.entries(eligibility.signals).map(([k,v]) => (
-                  <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.05)", fontSize:13 }}>
-                    <span style={{ color:"#8B8FA8" }}>{k}</span>
-                    <span style={{ color: v ? "#22c55e" : "#ef4444" }}>{v ? "✓ Pass" : "✗ Fail"}</span>
-                  </div>
-                ))}
+                {eligibility.signals && (() => {
+                  const labels: Record<string, string> = {
+                    layer1: "Wallet age & basic activity",
+                    layer2: "Transaction behavior & spread",
+                    layer3: "Financial intent signals",
+                    layer3Count: "Intent signal count",
+                  };
+                  const desc: Record<string, string> = {
+                    layer1: "Wallet must be 21+ days old with activity across 3+ separate days",
+                    layer2: "Transactions spread across different hours and multiple addresses",
+                    layer3: "At least one: transfer >$3, DeFi interaction, or CEX activity",
+                    layer3Count: "Minimum number of intent signals met",
+                  };
+                  return Object.entries(eligibility.signals).map(([k,v]) => (
+                    <div key={k} style={{ padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", fontSize:13 }}>
+                        <span style={{ color:"#8B8FA8" }}>{labels[k] ?? k}</span>
+                        <span style={{ color: v ? "#22c55e" : "#ef4444", fontWeight:600 }}>{v ? "✓ Pass" : "✗ Fail"}</span>
+                      </div>
+                      <p style={{ fontSize:11, color:"#555A72", marginTop:4 }}>{desc[k]}</p>
+                    </div>
+                  ));
+                })()}
               </div>
               <button onClick={() => setBypassElig(true)}
                 style={{ marginTop:8, padding:"12px 28px", borderRadius:12, background:"rgba(108,53,232,0.15)", border:"1px solid rgba(108,53,232,0.3)", color:"#8B5CF6", fontSize:14, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
@@ -619,7 +636,7 @@ export default function Home() {
           )}
 
           {/* MAIN DASHBOARD - always visible, blurred when not connected */}
-          <div style={{ opacity: !connected ? 0.25 : 1, pointerEvents: !connected ? "none" : "auto", filter: !connected ? "blur(2px)" : "none", transition:"all 0.3s" }}>
+          <div style={{ opacity: (!connected || (connected && eligibility && !eligibility.eligible && !bypassElig)) ? 0.25 : 1, pointerEvents: (!connected || (connected && eligibility && !eligibility.eligible && !bypassElig)) ? "none" : "auto", filter: (!connected || (connected && eligibility && !eligibility.eligible && !bypassElig)) ? "blur(2px)" : "none", transition:"all 0.3s" }}>
           {true && loadingData ? (
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"128px 0", color:"#4b5563", fontSize:14, gap:12 }}>
               <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7B2FE0] rounded-full animate-spin" />
