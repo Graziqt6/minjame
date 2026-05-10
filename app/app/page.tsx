@@ -55,6 +55,7 @@ interface LoanAccount {
 }
 interface EligibilityResult {
   eligible: boolean; maxAmount?: number; limit?: number; reason?: string;
+  signals?: { layer1?: boolean; layer2?: boolean; layer3?: boolean; layer3Count?: number };
   details?: { layer1: boolean; layer2: boolean; layer3: boolean; walletAge?: number; txDays?: number; hasStablecoin?: boolean; };
 }
 
