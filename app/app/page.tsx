@@ -734,7 +734,7 @@ export default function Home() {
                       style={{ background: `linear-gradient(to right, #7B2FE0 ${(amount / maxAmount) * 100}%, #1c1e24 ${(amount / maxAmount) * 100}%)` }} />
                     <div className="flex justify-between text-[0.65rem] text-[#6b7280] mb-5"><span>$1</span><span>${maxAmount}</span></div>
                     <div className="grid grid-cols-3 gap-2 mb-5">
-                      {[10, 25, maxAmount].map((v, i) => (
+                      {[Math.min(10, maxAmount), Math.min(25, maxAmount), maxAmount].filter((v, i, arr) => i === 0 || v !== arr[i-1]).map((v, i) => (
                         <button key={i} onClick={() => setAmount(v)}
                           className={`h-9 rounded-lg text-[0.8rem] font-medium transition-all duration-150 ${amount === v ? "bg-[#7B2FE0]/20 border border-[#7B2FE0]/40 text-white" : "bg-[#1a2235] border border-white/[0.15] text-[#94a3b8] hover:text-white hover:border-purple-500/50"}`}>
                           {i === 2 ? "MAX" : `$${v}`}
