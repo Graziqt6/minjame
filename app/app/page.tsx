@@ -618,8 +618,9 @@ export default function Home() {
             </div>
           )}
 
-          {/* MAIN DASHBOARD - connected + (eligible or bypassed) */}
-          {connected && (eligibility?.eligible || bypassElig) && loadingData ? (
+          {/* MAIN DASHBOARD - always visible, blurred when not connected */}
+          <div style={{ opacity: !connected ? 0.25 : 1, pointerEvents: !connected ? "none" : "auto", filter: !connected ? "blur(2px)" : "none", transition:"all 0.3s" }}>
+          {true && loadingData ? (
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"128px 0", color:"#4b5563", fontSize:14, gap:12 }}>
               <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7B2FE0] rounded-full animate-spin" />
               Loading your onchain data...
@@ -818,6 +819,7 @@ export default function Home() {
               </div>
             </div>
           )}
+          </div>
       </main>
     </div>
   );
