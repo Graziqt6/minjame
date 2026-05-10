@@ -3,10 +3,19 @@ export const NETWORK = "devnet";
 export const RPC_URL = "https://api.devnet.solana.com";
 
 export const TIERS = [
-  { name: "Baru", limit: 10, rate: 18, color: "#6B7280" },
-  { name: "Terpercaya", limit: 50, rate: 13, color: "#3B82F6" },
-  { name: "Andalan", limit: 150, rate: 9, color: "#8B5CF6" },
-  { name: "Mitra", limit: 500, rate: 6, color: "#10B981" },
+  { name: "Baru", limit: 10, color: "#6B7280" },
+  { name: "Terpercaya", limit: 25, color: "#3B82F6" },
+  { name: "Andalan", limit: 50, color: "#8B5CF6" },
+  { name: "Mitra", limit: 100, color: "#10B981" },
+  { name: "Utama", limit: 250, color: "#F59E0B" },
+];
+
+export const APR_BRACKETS = [
+  { max: 10, rate: 15 },
+  { max: 25, rate: 12 },
+  { max: 50, rate: 10 },
+  { max: 100, rate: 8 },
+  { max: 250, rate: 6 },
 ];
 
 export const INTENT_DEPOSIT = 2;

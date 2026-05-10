@@ -43,7 +43,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 import { fetchUserScore, fetchActiveLoan, createLoan, repayLoan } from "../lib/solana";
 import { checkEligibility } from "../lib/eligibility";
-import { TIERS } from "../lib/constants";
+import { TIERS, APR_BRACKETS } from "../lib/constants";
 
 interface UserScore {
   score: number; tier: number; repaymentCount: number; onTimeCount: number;
@@ -386,7 +386,8 @@ export default function Home() {
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
-  const interestRate  = TIERS[userScore?.tier ?? 0]?.rate ?? 18;
+  const getAPR = (amt: number) => APR_BRACKETS.find(b => amt <= b.max)?.rate ?? APR_BRACKETS[APR_BRACKETS.length - 1].rate;
+  const interestRate = getAPR(amount);
   const interest      = parseFloat(((amount * interestRate / 100 * 14) / 365).toFixed(2));
   const totalRepay    = (amount + interest).toFixed(2);
   const intentDeposit = 2;
@@ -579,7 +580,7 @@ export default function Home() {
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
                     {[
                       { lbl: t.limit, val: `$${maxAmount}`, unit: "USDC", color: "#f0eef8" },
-                      { lbl: t.interestYear, val: `${(interestRate).toFixed(0)}`, unit: "%", color: "#f0eef8" },
+                      { lbl: "APR (current)", val: `${interestRate}`, unit: "%", color: "#f0eef8" },
                       { lbl: "Loans repaid", val: `${userScore?.repaymentCount ?? 0}`, unit: "total", color: "#f0eef8" },
                       { lbl: "On-time", val: `${userScore?.onTimeCount ?? 0}`, unit: `/ ${userScore?.repaymentCount ?? 0}`, color: "#22c55e" },
                     ].map((s) => (
@@ -613,7 +614,7 @@ export default function Home() {
                             <span style={{ fontSize:13, fontWeight:500, color: isCurrent ? "#f0eef8" : isPast ? "#555A72" : "#8B8FA8" }}>{tier.name}</span>
                             {isCurrent && <span style={{ fontSize:10, background:"rgba(34,197,94,0.1)", color:"#22c55e", border:"1px solid rgba(34,197,94,0.2)", padding:"2px 6px", borderRadius:5, textTransform:"uppercase", letterSpacing:"0.08em" }}>current</span>}
                           </div>
-                          <span style={{ fontSize:12, color:"#555A72" }}>${tier.limit} · {tier.rate}% APR</span>
+                          <span style={{ fontSize:12, color:"#555A72" }}>up to ${tier.limit} USDC</span>
                         </div>
                       );
                     })}
