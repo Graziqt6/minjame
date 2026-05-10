@@ -827,8 +827,8 @@ export default function Home() {
                     <p className="text-[0.7rem] text-[#6b7280] mb-5">* The $2 deposit is not a fee - it is returned when you repay.</p>
                     {txError && <div className="bg-red-950/40 border border-red-900/40 rounded-xl px-4 py-3 mb-4"><p className="text-[0.78rem] text-red-400">{txError}</p></div>}
                     {status && <p className="text-[0.78rem] text-[#9ca3af] mb-4 flex items-center gap-2"><span className="w-3.5 h-3.5 border-2 border-[#9ca3af] border-t-transparent rounded-full animate-spin" />{status}</p>}
-                    <button onClick={handleBorrow} disabled={loading || (eligibility !== null && !eligibility.eligible)}
-                      className={`w-full h-12 rounded-xl font-semibold text-[0.9rem] transition-all duration-200 ${loading || (eligibility !== null && !eligibility.eligible) ? "bg-[#1c1e24] text-[#4b5563] cursor-not-allowed" : "bg-[#7B2FE0] hover:bg-[#6025c0] text-white shadow-lg shadow-purple-900/25 cursor-pointer"}`}>
+                    <button onClick={handleBorrow} disabled={loading || (eligibility !== null && !eligibility.eligible && !bypassElig)}
+                      className={`w-full h-12 rounded-xl font-semibold text-[0.9rem] transition-all duration-200 ${loading || (eligibility !== null && !eligibility.eligible && !bypassElig) ? "bg-[#1c1e24] text-[#4b5563] cursor-not-allowed" : "bg-[#7B2FE0] hover:bg-[#6025c0] text-white shadow-lg shadow-purple-900/25 cursor-pointer"}`}>
                       {loading ? t.processing : `Take Loan - $${amount} USDC`}
                     </button>
                   </div>
