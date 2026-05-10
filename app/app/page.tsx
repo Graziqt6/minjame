@@ -401,7 +401,7 @@ export default function Home() {
     if (mode === "simulation") {
       setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
       setLoanAccount(null);
-      setEligibility({ eligible: true, maxAmount: currentTierRef, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
+      setEligibility({ eligible: true, maxAmount: TIERS[0].limit, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
       return;
     }
     if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); return; }
