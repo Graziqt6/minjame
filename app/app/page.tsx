@@ -145,7 +145,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
       </section>
 
       <div id="stats" style={{ borderTop:"1px solid rgba(255,255,255,0.07)", borderBottom:"1px solid rgba(255,255,255,0.07)", padding:"32px 48px", display:"grid", gridTemplateColumns:"repeat(4,1fr)", background:"#0E1225" }}>
-        {[{num:"$10",label:"Starting loan, no collateral"},{num:"18%",label:"APR from loan size"},{num:"14 days",label:"Loan term, pay and repeat"},{num:"$2",label:"Intent deposit — fully refunded"}].map((s,i,arr) => (
+        {[{num:"$10",label:"Starting loan, no collateral"},{num:"6–15%",label:"APR from loan size"},{num:"14 days",label:"Loan term, pay and repeat"},{num:"$2",label:"Intent deposit — fully refunded"}].map((s,i,arr) => (
           <div key={s.num} style={{ textAlign:"center", padding:"0 24px", borderRight: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
             <span style={{ fontFamily:"'Syne',sans-serif", fontSize:32, fontWeight:700, color:"#8B5CF6", display:"block" }}>{s.num}</span>
             <div style={{ fontSize:13, color:"#8B8FA8", marginTop:4 }}>{s.label}</div>
