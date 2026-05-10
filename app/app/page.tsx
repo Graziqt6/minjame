@@ -253,10 +253,8 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
                     {row.badge && <span style={{ marginLeft:8, padding:"3px 10px", borderRadius:100, fontSize:11, fontWeight:600, background:"rgba(139,92,246,0.2)", color:"#A78BFA", border:"1px solid rgba(139,92,246,0.4)", display:"inline-block" }}>{row.badge}</span>}
                   </td>
                   <td style={{ padding:"20px 24px", fontSize:15, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>{row.name}</td>
-                  <td style={{ padding:"20px 24px", fontSize:15, color:"#8B8FA8", borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>{row.col}</td>
-                  <td style={{ padding:"20px 24px", fontSize:15, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>{row.limit}</td>
-                  <td style={{ padding:"20px 24px", fontSize:15, color:"#8B5CF6", fontWeight:600, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>{row.apr}</td>
-                </tr>
+                         <td style={{ padding:"20px 24px", fontSize:15, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>{row.limit}</td>
+                       </tr>
               ))}
             </tbody>
           </table>
