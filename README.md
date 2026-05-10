@@ -41,10 +41,10 @@ MINJAME is the infrastructure layer that changes that.
 
 ## Try It
 
-### Devnet Mode
-Connect a Phantom wallet (set to Devnet), get USDC from [faucet.circle.com](https://faucet.circle.com), and run real Solana transactions.
+### Simulation Mode
+Connect any Phantom wallet. The app runs a real eligibility check on your wallet history, then lets you simulate the full borrow and repay cycle without any real funds. If your wallet is not eligible, you can still try the simulation anyway.
 
-**For judges:** The full borrow and repay cycle is live on Devnet. Program ID is verifiable on Explorer. Every score update is a real on-chain write.
+**For judges:** Connect any wallet → see real eligibility check → simulate full borrow and repay cycle → watch tier and score update in real time.
 
 ---
 
@@ -188,7 +188,7 @@ These are next phases, not gaps. The core credit loop — borrow, repay, score g
 cd app && npm install && npm run dev
 ```
 
-Set Phantom to Devnet. Get test USDC at [faucet.circle.com](https://faucet.circle.com).
+Connect any Phantom wallet to try the simulation.
 
 ---
 
