@@ -512,7 +512,8 @@ export default function Home() {
 
       {/* HEADER */}
       <header style={{ height:72, borderBottom:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 48px", background:"rgba(5,8,22,0.95)", backdropFilter:"blur(12px)", position:"sticky", top:0, zIndex:50 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }}
+          onClick={() => { setShowSplash(true); setMode("simulation"); setUserScore(null); setLoanAccount(null); setEligibility(null); }}>
           <img src="/logo.png" alt="MINJAME" style={{ width:44, height:44, objectFit:"contain", mixBlendMode:"screen" }} />
           <img src="/wordmark.png" alt="MINJAME" style={{ height:28, objectFit:"contain", mixBlendMode:"screen" }} />
         </div>
