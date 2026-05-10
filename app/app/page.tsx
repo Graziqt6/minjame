@@ -122,7 +122,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         <div style={{ position:"absolute", top:"-10%", left:"50%", transform:"translateX(-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(108,53,232,0.13) 0%, transparent 70%)", pointerEvents:"none" }} />
         <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(108,53,232,0.12)", border:"1px solid rgba(108,53,232,0.3)", borderRadius:100, padding:"6px 16px", fontSize:13, color:"#8B5CF6", marginBottom:40, fontWeight:500 }}>
           <span style={{ width:6, height:6, background:"#8B5CF6", borderRadius:"50%", display:"inline-block", animation:"blink 2s infinite" }} />
-          Solana Devnet · DeFi · Indonesia
+          Solana Devnet
         </div>
 
         <h1 style={{ fontFamily:"'Syne', sans-serif", fontWeight:800, fontSize:"clamp(32px,3.8vw,56px)", lineHeight:1.1, letterSpacing:"-0.03em", marginBottom:28, maxWidth:720 }}>
