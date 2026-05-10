@@ -190,7 +190,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
               {n:"1",title:"Connect Phantom",body:"Link your Solana wallet. That is your identity here."},
               {n:"2",title:"Eligibility check",body:"3-layer wallet analysis runs automatically. No forms."},
               {n:"3",title:"Pay $2 deposit",body:"Refundable intent deposit. Honest borrowers get it back."},
-              {n:"4",title:"Borrow $5-$10",body:"USDC lands in your wallet. 14-day term, 18% APR."},
+              {n:"4",title:"Borrow $10",body:"USDC lands in your wallet. 14-day term, repay in full."},
               {n:"5",title:"Repay on time",body:"Your score rises. Next loan has better terms."},
             ].map(s => (
               <div key={s.n} style={{ textAlign:"center", padding:"0 12px" }}>
@@ -234,18 +234,18 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
           <table style={{ width:"100%", borderCollapse:"collapse", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, overflow:"hidden" }}>
             <thead>
               <tr style={{ background:"#111528" }}>
-                {["Tier","Name","Collateral","Limit","APR"].map(h => (
+                {["Tier","Name","Limit"].map(h => (
                   <th key={h} style={{ padding:"16px 24px", textAlign:"left", fontSize:12, fontWeight:600, letterSpacing:"0.08em", textTransform:"uppercase", color:"#555A72", borderBottom:"1px solid rgba(255,255,255,0.07)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[
-                {tier:"0",name:"Baru",col:"None — first loan",limit:"$10",apr:"15%",badge:"Start here"},
-                {tier:"1",name:"Terpercaya",col:"None",limit:"$25",apr:"12%",badge:null},
-                {tier:"2",name:"Andalan",col:"None",limit:"$50",apr:"10%",badge:null},
-                {tier:"3",name:"Mitra",col:"None",limit:"$100",apr:"8%",badge:null},
-                {tier:"4",name:"Utama",col:"None",limit:"$250",apr:"6%",badge:null},
+                {tier:"0",name:"Baru",limit:"$10",badge:"Start here"},
+                {tier:"1",name:"Terpercaya",limit:"$25",badge:null},
+                {tier:"2",name:"Andalan",limit:"$50",badge:null},
+                {tier:"3",name:"Mitra",limit:"$100",badge:null},
+                {tier:"4",name:"Utama",limit:"$250",badge:null},
               ].map((row,i,arr) => (
                 <tr key={row.tier}>
                   <td style={{ padding:"20px 24px", fontSize:15, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
