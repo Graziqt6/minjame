@@ -1,0 +1,620 @@
+"use client";
+
+const T = {
+  en: {
+    level: "Level", limit: "Limit", interestYear: "Interest / Year",
+    score: "Score", amount: "Amount", borrowNow: "Borrow Now",
+    repayNow: "Repay Now", activeLoan: "Active Loan",
+    tierProgression: "Tier Progression", processing: "Processing...",
+    increases: "Increases with on-time repayments",
+    yourLimit: "Your limit and rate improve as your reputation grows.",
+    repayUnlock: "Repay on time to unlock better terms.",
+    allData: "All data stored onchain",
+    loansRepaid: "Loans Repaid", onTime: "On-Time",
+    dueDate: "Due Date", daysLeft: "Days Left",
+    totalRepay: "Total to Repay", depositReturn: "Deposit Returned",
+    youReceive: "You receive", intentDeposit: "Intent deposit",
+    totalRepayment: "Total repayment", interest: "Interest",
+    awaitingSig: "Awaiting wallet signature...",
+    highest: "You have reached the highest level - Mitra.",
+  },
+  id: {
+    level: "Level", limit: "Limit", interestYear: "Bunga / Tahun",
+    score: "Skor", amount: "Jumlah", borrowNow: "Pinjam Sekarang",
+    repayNow: "Bayar Sekarang", activeLoan: "Pinjaman Aktif",
+    tierProgression: "Progres Tier", processing: "Memproses...",
+    increases: "Naik saat bayar tepat waktu",
+    yourLimit: "Limit dan bunga membaik seiring reputasimu.",
+    repayUnlock: "Bayar tepat waktu untuk syarat lebih baik.",
+    allData: "Semua data tersimpan onchain",
+    loansRepaid: "Pinjaman Dibayar", onTime: "Tepat Waktu",
+    dueDate: "Jatuh Tempo", daysLeft: "Sisa Hari",
+    totalRepay: "Total Bayar", depositReturn: "Deposit Kembali",
+    youReceive: "Kamu terima", intentDeposit: "Deposit niat",
+    totalRepayment: "Total pembayaran", interest: "Bunga",
+    awaitingSig: "Menunggu tanda tangan dompet...",
+    highest: "Kamu sudah di level tertinggi - Mitra.",
+  },
+};
+
+import { ModeSelect } from "./mode-select";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useEffect, useState } from "react";
+import { fetchUserScore, fetchActiveLoan, createLoan, repayLoan } from "../lib/solana";
+import { checkEligibility } from "../lib/eligibility";
+import { TIERS } from "../lib/constants";
+
+interface UserScore {
+  score: number; tier: number; repaymentCount: number; onTimeCount: number;
+  loanCount?: number; repaidCount?: number; defaultCount?: number;
+}
+interface LoanAccount {
+  borrower?: string; amount: number; intentDeposit: number;
+  dueDate: Date | number; repaid: boolean; active?: boolean;
+}
+interface EligibilityResult {
+  eligible: boolean; maxAmount?: number; limit?: number; reason?: string;
+  details?: { layer1: boolean; layer2: boolean; layer3: boolean; walletAge?: number; txDays?: number; hasStablecoin?: boolean; };
+}
+
+function MinjameLogo({ size = 52 }: { size?: number }) {
+  const r = Math.round(size * 0.22);
+  return (
+    <div style={{
+      width: size, height: size,
+      background: "linear-gradient(140deg, #6025c0 0%, #9d4ee8 100%)",
+      borderRadius: r,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: "0 0 32px rgba(124,58,237,0.35), 0 8px 24px rgba(0,0,0,0.4)",
+      flexShrink: 0,
+    }}>
+      <svg width={size * 0.62} height={size * 0.62} viewBox="0 0 56 56" fill="none">
+        <path d="M10 34 L16 20 L28 30 L40 20 L46 34" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <ellipse cx="28" cy="13" rx="3.5" ry="5" fill="white" opacity="0.95"/>
+        <path d="M8 40 Q8 36 16 36 Q22 36 28 36 Q34 36 40 36 Q48 36 48 40 Q48 46 40 49 Q34 51 28 51 Q22 51 16 49 Q8 46 8 40Z" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+        <path d="M14 49 Q14 54 28 55 Q42 54 42 49" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      </svg>
+    </div>
+  );
+}
+
+function SplashScreen({ onEnter }: { onEnter: () => void }) {
+  const [agreed, setAgreed] = useState(false);
+  return (
+    <div style={{ minHeight: "100vh", background: "#050816", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 1.5rem", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 600, height: 400, background: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginBottom: 40, position: "relative" }}>
+        <img src="/logo.png" alt="Minjame" style={{ width: 180, height: 180, objectFit: "contain", display: "block", margin: "0 auto" }} />
+        <img src="/wordmark.png" alt="MINJAME" style={{ height: 52, objectFit: "contain", display: "block", margin: "0 auto" }} />
+      </div>
+
+      <h1 style={{ fontFamily: "var(--font-syne, 'Syne', sans-serif)", fontWeight: 800, fontSize: "2.4rem", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#f1f5ff", textAlign: "center", maxWidth: 520, marginBottom: 16 }}>
+        Your first loan{" "}
+        <span style={{ background: "linear-gradient(90deg, #9d4ee8, #b06ef5)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+          starts here.
+        </span>
+      </h1>
+
+      <p style={{ fontSize: "1rem", color: "#6b7fa3", textAlign: "center", marginBottom: 16, lineHeight: 1.6, fontWeight: 300, maxWidth: 380 }}>
+        Borrow small. Build reputation forever.
+      </p>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 28 }}>
+        {["Collateral", "KYC", "Bank"].map((word, i) => (
+          <div key={word} style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <span style={{ position: "relative", fontSize: "0.85rem", color: "rgba(255,255,255,0.22)", fontWeight: 400, display: "inline-block" }}>
+              {word}
+              <span style={{ position: "absolute", left: -2, right: -2, top: "52%", height: 1.5, background: "rgba(239,68,68,0.6)", transform: "translateY(-50%) rotate(-6deg)", borderRadius: 2, display: "block", pointerEvents: "none" }} />
+            </span>
+            {i < 2 && <span style={{ color: "rgba(255,255,255,0.08)", fontSize: "0.75rem" }}>·</span>}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 36 }}>
+        {[{ icon: "🔓", label: "No collateral" }, { icon: "📋", label: "No documents" }, { icon: "⛓", label: "Permanent onchain credit" }].map((c) => (
+          <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 7, background: "#0d1525", border: "1px solid rgba(255,255,255,0.07)", padding: "6px 14px", borderRadius: 30, fontSize: "0.78rem", color: "#6b7fa3" }}>
+            <span style={{ fontSize: "0.85rem" }}>{c.icon}</span>{c.label}
+          </div>
+        ))}
+      </div>
+
+      <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 20, userSelect: "none" }}>
+        <div onClick={() => setAgreed(!agreed)} style={{ width: 18, height: 18, borderRadius: 4, border: agreed ? "none" : "1px solid #3a3d48", background: agreed ? "#7B2FE0" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer", transition: "all 0.15s" }}>
+          {agreed && <svg width="10" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 4L4 7L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        </div>
+        <span style={{ fontSize: "0.85rem", color: "#9ca3af" }}>I understand this is a Solana Devnet demo</span>
+      </label>
+
+      <button onClick={onEnter} disabled={!agreed} style={{ width: "100%", maxWidth: 340, height: 52, borderRadius: 12, border: "none", fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)", fontWeight: 600, fontSize: "0.95rem", cursor: agreed ? "pointer" : "not-allowed", transition: "all 0.18s", background: agreed ? "linear-gradient(135deg, #7B2FE0, #9d4ee8)" : "#1c1e24", color: agreed ? "#fff" : "#4b5563", boxShadow: agreed ? "0 4px 24px rgba(124,58,237,0.3)" : "none" }}>
+        Enter App →
+      </button>
+
+      <p style={{ marginTop: 20, fontSize: "0.72rem", color: "#2d3a52", letterSpacing: "0.04em" }}>
+        Solana Devnet · No real funds at risk
+      </p>
+    </div>
+  );
+}
+
+function ScoreRing({ score, max = 500 }: { score: number; max?: number }) {
+  const pct = Math.min(score / max, 1);
+  const r = 36;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * pct;
+  return (
+    <div className="relative w-24 h-24 flex items-center justify-center">
+      <svg width="96" height="96" viewBox="0 0 96 96" className="-rotate-90">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#7B2FE0" />
+            <stop offset="100%" stopColor="#9d4ee8" />
+          </linearGradient>
+        </defs>
+        <circle cx="48" cy="48" r={r} fill="none" stroke="#1e2027" strokeWidth="7" />
+        <circle cx="48" cy="48" r={r} fill="none" stroke="url(#scoreGrad)" strokeWidth="7"
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-bold text-white leading-none">{score}</span>
+        <span className="text-[0.65rem] text-[#6b7280] mt-0.5 tracking-wider uppercase">Score</span>
+      </div>
+    </div>
+  );
+}
+
+const TIER_COLORS: Record<number, { dot: string; text: string }> = {
+  0: { dot: "bg-[#6b7280]", text: "text-[#9ca3af]" },
+  1: { dot: "bg-[#3b82f6]", text: "text-[#93c5fd]" },
+  2: { dot: "bg-[#9B3FE0]", text: "text-[#d8b4fe]" },
+  3: { dot: "bg-[#22c55e]", text: "text-[#86efac]" },
+};
+
+export default function Home() {
+  const { publicKey, connected, ...walletRest } = useWallet();
+  const wallet = { publicKey, connected, ...walletRest };
+
+  const [showSplash, setShowSplash]       = useState(true);
+  const [userScore, setUserScore]         = useState<UserScore | null>(null);
+  const [loanAccount, setLoanAccount]     = useState<LoanAccount | null>(null);
+  const [eligibility, setEligibility]     = useState<EligibilityResult | null>(null);
+  const [amount, setAmount]               = useState(10);
+  const [loading, setLoading]             = useState(false);
+  const [status, setStatus]               = useState<string | null>(null);
+  const [repaidSuccess, setRepaidSuccess] = useState<{ txSig: string } | null>(null);
+  const [borrowSuccess, setBorrowSuccess] = useState<{ txSig: string; amount: number } | null>(null);
+  const [txError, setTxError]             = useState<string | null>(null);
+  const [loadingData, setLoadingData]     = useState(false);
+  const [showIdInfo, setShowIdInfo]       = useState(false);
+  const [now, setNow]                     = useState(Date.now());
+  const [prevScore, setPrevScore]         = useState<number | null>(null);
+  const [lang, setLang] = useState<"en" | "id">(() => {
+    if (typeof window !== "undefined") return (localStorage.getItem("minjame_lang") as "en" | "id") || "en";
+    return "en";
+  });
+  const t = T[lang];
+  const [mode, setMode] = useState<"simulation" | "devnet" | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("minjame_mode");
+      if (saved === "simulation" || saved === "devnet") return saved;
+    }
+    return null;
+  });
+
+  const currentTier   = userScore ? TIERS[userScore.tier] : null;
+  const maxAmount     = eligibility?.maxAmount ?? currentTier?.limit ?? 10;
+  const interestRate  = currentTier?.rate ?? 0.18;
+  const interest      = parseFloat(((amount * interestRate / 100 * 14) / 365).toFixed(2));
+  const totalRepay    = (amount + interest).toFixed(2);
+  const intentDeposit = 2;
+  const dueDate       = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (mode === "simulation") {
+      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
+      setLoanAccount(null);
+      setEligibility({ eligible: true, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
+      return;
+    }
+    if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); return; }
+    const load = async () => {
+      setLoadingData(true);
+      try {
+        const [score, loan, elig] = await Promise.all([
+          fetchUserScore(publicKey, wallet),
+          fetchActiveLoan(publicKey, wallet),
+          checkEligibility(publicKey.toString()),
+        ]);
+        setUserScore(score); setLoanAccount(loan); setEligibility(elig);
+      } catch (e) { console.error(e); }
+      finally { setLoadingData(false); }
+    };
+    load();
+  }, [connected, publicKey]);
+
+  const handleBorrow = async () => {
+    setLoading(true); setTxError(null);
+    if (mode === "simulation") {
+      await new Promise(r => setTimeout(r, 800));
+      const mockDue = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      setLoanAccount({ amount, intentDeposit: 2, dueDate: mockDue, repaid: false });
+      setBorrowSuccess({ txSig: "simulation", amount });
+      setLoading(false); return;
+    }
+    if (!publicKey) { setLoading(false); return; }
+    setStatus(t.awaitingSig);
+    try {
+      const txSig = await createLoan(wallet, amount);
+      setBorrowSuccess({ txSig, amount }); setStatus(null);
+      const [score, loan] = await Promise.all([fetchUserScore(publicKey, wallet), fetchActiveLoan(publicKey, wallet)]);
+      setUserScore(score); setLoanAccount(loan);
+    } catch (e: unknown) { setTxError(e instanceof Error ? e.message : "Transaction failed"); setStatus(null); }
+    finally { setLoading(false); }
+  };
+
+  const handleRepay = async () => {
+    if (!loanAccount) return;
+    setLoading(true); setTxError(null);
+    if (mode === "simulation") {
+      await new Promise(r => setTimeout(r, 800));
+      const oldScore = userScore?.score ?? 120;
+      setPrevScore(oldScore);
+      setUserScore({ score: oldScore + 30, tier: Math.min((userScore?.tier ?? 0), 3), repaymentCount: (userScore?.repaymentCount ?? 0) + 1, onTimeCount: (userScore?.onTimeCount ?? 0) + 1 });
+      setLoanAccount(null); setRepaidSuccess({ txSig: "simulation" });
+      setLoading(false); return;
+    }
+    if (!publicKey) { setLoading(false); return; }
+    setStatus(t.awaitingSig);
+    try {
+      const scoreBeforeRepay = userScore?.score ?? null;
+      const txSig = await repayLoan(wallet);
+      setPrevScore(scoreBeforeRepay); setRepaidSuccess({ txSig }); setStatus(null);
+      const [score, loan] = await Promise.all([fetchUserScore(publicKey, wallet), fetchActiveLoan(publicKey, wallet)]);
+      setUserScore(score); setLoanAccount(loan);
+    } catch (e: unknown) { setTxError(e instanceof Error ? e.message : "Transaction failed"); setStatus(null); }
+    finally { setLoading(false); }
+  };
+
+  if (showSplash) return <SplashScreen onEnter={() => setShowSplash(false)} />;
+
+  if (!mode) {
+    return (
+      <ModeSelect lang="en" onSelect={(selected) => { setMode(selected); localStorage.setItem("minjame_mode", selected); }} />
+    );
+  }
+
+  if (repaidSuccess) {
+    return (
+      <div className="min-h-screen bg-[#050816] flex items-center justify-center px-6">
+        <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-10 max-w-sm w-full text-center shadow-2xl">
+          <div className="w-14 h-14 bg-[#052e16] rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12l5 5L19 7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="text-[1.4rem] font-semibold text-[#22c55e] mb-2">Repaid!</h2>
+          <p className="text-[0.875rem] text-white mb-3">You unlocked higher borrowing power</p>
+          {prevScore !== null && userScore && userScore.score > prevScore && (
+            <div className="inline-flex items-center gap-2 bg-[#052e16] border border-[#22c55e]/20 rounded-lg px-3 py-1.5 mb-4">
+              <span className="text-[0.8rem] text-[#6b7280]">{t.score}</span>
+              <span className="text-[0.8rem] text-[#6b7280]">{prevScore}</span>
+              <span className="text-[0.75rem] text-[#4b5563]">to</span>
+              <span className="text-[0.9rem] font-bold text-[#22c55e]">{userScore.score}</span>
+              <span className="text-[0.75rem] font-semibold text-[#22c55e]">+{userScore.score - prevScore}</span>
+            </div>
+          )}
+          <p className="text-[0.8rem] text-[#6b7280] mb-6">$2 deposit has been returned to your wallet.</p>
+          <a href={`https://explorer.solana.com/tx/${repaidSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-[0.8rem] text-[#9B3FE0] hover:text-purple-300 transition-colors">
+            View on Solana Explorer
+          </a>
+          <button onClick={() => setRepaidSuccess(null)}
+            className="mt-6 w-full h-10 rounded-xl bg-[#1c1e24] text-[#9ca3af] text-sm hover:text-white hover:bg-[#22252d] transition-all">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (borrowSuccess) {
+    return (
+      <div className="min-h-screen bg-[#050816] flex items-center justify-center px-6">
+        <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-10 max-w-sm w-full text-center shadow-2xl">
+          <div className="w-14 h-14 bg-[#1e1235] rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#7B2FE0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="text-[1.4rem] font-semibold text-white mb-2">${borrowSuccess.amount} USDC Sent</h2>
+          <p className="text-[0.875rem] text-[#9ca3af] mb-6">Funds are on their way to your wallet.</p>
+          <a href={`https://explorer.solana.com/tx/${borrowSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-[0.8rem] text-[#9B3FE0] hover:text-purple-300 transition-colors">
+            View on Solana Explorer
+          </a>
+          <button onClick={() => setBorrowSuccess(null)}
+            className="mt-6 w-full h-10 rounded-xl bg-[#1c1e24] text-[#9ca3af] text-sm hover:text-white hover:bg-[#22252d] transition-all">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050816] text-white font-sans">
+      <header className="h-14 border-b border-white/[0.05] flex items-center justify-between px-6 bg-[#080d1a]">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="Minjame" style={{ width: 48, height: 48, objectFit: "contain" }} />
+          <img src="/wordmark.png" alt="MINJAME" style={{ height: 26, objectFit: "contain" }} />
+          <span className="hidden sm:inline text-[0.7rem] text-[#374151] tracking-widest uppercase ml-1">
+            {mode === "simulation" ? "Simulation" : "Devnet"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button onClick={() => setShowIdInfo(!showIdInfo)}
+              className="h-8 px-3 rounded-lg bg-[#1c1e24] border border-white/[0.06] text-[#9ca3af] text-[0.7rem] font-semibold hover:text-white hover:border-white/10 transition-all flex items-center gap-1">
+              {lang === "en" ? "EN" : "ID"}
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
+            </button>
+            {showIdInfo && (
+              <div className="absolute top-10 right-0 z-50 bg-[#0d1525] border border-white/[0.06] rounded-xl overflow-hidden shadow-2xl w-28">
+                {["en", "id"].map((l) => (
+                  <button key={l} onClick={() => { setLang(l as "en"|"id"); localStorage.setItem("minjame_lang", l); setShowIdInfo(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${lang === l ? "text-white bg-white/[0.06]" : "text-[#6b7280] hover:text-white hover:bg-white/[0.04]"}`}>
+                    {l === "en" ? "English" : "Indonesia"}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <WalletMultiButton style={{ height: "32px", padding: "0 14px", fontSize: "0.8rem", fontWeight: 500, borderRadius: "10px", background: "#7B2FE0", border: "none" }} />
+        </div>
+      </header>
+
+      <div className={`w-full py-1.5 px-4 flex items-center text-xs ${mode === "simulation" ? "bg-yellow-500/10 border-b border-yellow-500/20" : "bg-purple-500/10 border-b border-purple-500/20"}`}>
+        <div className="flex items-center gap-2 max-w-5xl mx-auto w-full justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`w-1.5 h-1.5 rounded-full ${mode === "simulation" ? "bg-yellow-400" : "bg-purple-400"}`} />
+            <span className={mode === "simulation" ? "text-yellow-400" : "text-purple-400"}>
+              {mode === "simulation" ? "Simulation Mode - no real transactions" : "Devnet Mode - real on-chain transactions"}
+            </span>
+          </div>
+          <button onClick={() => { const next = mode === "simulation" ? "devnet" : "simulation"; setMode(next); localStorage.setItem("minjame_mode", next); }}
+            className={`text-[0.7rem] px-2.5 py-1 rounded-md border transition-all ${mode === "simulation" ? "border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10" : "border-purple-500/30 text-purple-400 hover:bg-purple-500/10"}`}>
+            {mode === "simulation" ? "Switch to Devnet" : "Switch to Simulation"}
+          </button>
+        </div>
+      </div>
+
+      {!connected && (
+        <main className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-3">MINJAME</h1>
+          <p className="text-[1rem] text-[#9ca3af] mb-2">Onchain credit for everyday crypto users</p>
+          <p className="text-[0.85rem] text-[#4b5563] mb-10">No collateral. No KYC. Build your onchain credit score.</p>
+          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            {[{ icon: "🔒", label: "No collateral required" }, { icon: "📋", label: "No KYC or documents" }, { icon: "📈", label: "Build permanent onchain credit" }].map((f) => (
+              <div key={f.label} className="flex items-center gap-2 bg-[#0d1525] border border-white/[0.05] rounded-xl px-4 py-2.5">
+                <span className="text-base">{f.icon}</span>
+                <span className="text-[0.8rem] text-[#9ca3af]">{f.label}</span>
+              </div>
+            ))}
+          </div>
+          <WalletMultiButton style={{ height: "48px", padding: "0 28px", fontSize: "0.925rem", fontWeight: 600, borderRadius: "12px", background: "#7B2FE0", border: "none" }} />
+        </main>
+      )}
+
+      {connected && (
+        <main className="max-w-[1100px] mx-auto px-5 py-8">
+          {loadingData ? (
+            <div className="flex items-center justify-center py-32 text-[#4b5563] text-sm gap-3">
+              <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7B2FE0] rounded-full animate-spin" />
+              Loading your onchain data...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5">
+              <div className="flex flex-col gap-4">
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                  <div className="flex items-start gap-5">
+                    <ScoreRing score={userScore?.score ?? 0} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-widest mb-1.5">{t.level}</p>
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <h2 className="text-2xl font-bold text-white leading-none">{currentTier?.name ?? "Baru"}</h2>
+                        <span className="text-[0.65rem] bg-[#1c1e24] border border-white/[0.08] text-[#9ca3af] px-2 py-0.5 rounded-md uppercase tracking-wider font-medium">On-Chain</span>
+                      </div>
+                      <p className="text-[0.78rem] text-[#6b7280] leading-relaxed">{t.increases}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-5">
+                    {[
+                      { lbl: t.limit, val: `$${maxAmount}`, unit: "USDC", color: "text-white" },
+                      { lbl: t.interestYear, val: `${(interestRate).toFixed(0)}`, unit: "%", color: "text-white" },
+                      { lbl: "Loans repaid", val: `${userScore?.repaymentCount ?? 0}`, unit: "total", color: "text-white" },
+                      { lbl: "On-time", val: `${userScore?.onTimeCount ?? 0}`, unit: `/ ${userScore?.repaymentCount ?? 0}`, color: "text-[#22c55e]" },
+                    ].map((s) => (
+                      <div key={s.lbl} className="bg-[#1a2235] rounded-xl p-4">
+                        <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">{s.lbl}</p>
+                        <p className={`text-xl font-bold ${s.color}`}>{s.val}<span className="text-[0.75rem] font-normal text-[#6b7280] ml-1">{s.unit}</span></p>
+                      </div>
+                    ))}
+                  </div>
+                  {publicKey && <p className="mt-4 text-[0.72rem] text-[#6b7280] font-mono truncate">{publicKey.toString()}</p>}
+                </div>
+
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl px-6 py-5">
+                  <p className="text-[0.875rem] text-[#c4cde0] leading-relaxed mb-1">{t.yourLimit}</p>
+                  {userScore && userScore.tier >= 3
+                    ? <p className="text-[0.8rem] text-[#22c55e]">{t.highest}</p>
+                    : <p className="text-[0.8rem] text-[#9B3FE0]">{t.repayUnlock}</p>}
+                  <div className="mt-4 text-[0.72rem] text-[#94a3b8]">· {t.allData}</div>
+                </div>
+
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                  <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-4">Tier Progression</p>
+                  <div className="flex flex-col gap-2">
+                    {TIERS.map((tier, i) => {
+                      const isCurrent = userScore?.tier === i;
+                      const isPast = (userScore?.tier ?? 0) > i;
+                      return (
+                        <div key={tier.name} className={`flex items-center justify-between rounded-xl px-4 py-3 ${isCurrent ? "bg-[#080d1a] border border-white/[0.08]" : ""}`}>
+                          <div className="flex items-center gap-3">
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isCurrent ? TIER_COLORS[i].dot : isPast ? TIER_COLORS[i].dot : "bg-[#1e2027]"}`} />
+                            <span className={`text-[0.825rem] font-medium ${isCurrent ? "text-white" : isPast ? "text-[#6b7280]" : "text-[#9ca3af]"}`}>{tier.name}</span>
+                            {isCurrent && <span className="text-[0.6rem] bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20 px-1.5 py-0.5 rounded-md uppercase tracking-wider">current</span>}
+                          </div>
+                          <span className="text-[0.78rem] text-[#94a3b8]">${tier.limit} · {tier.rate}% APR</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {loanAccount && !loanAccount.repaid && (
+                  <>
+                    <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse" />
+                          <h3 className="text-[0.95rem] font-semibold text-white">{t.activeLoan}</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[0.65rem] bg-[#080d1a] border border-white/[0.06] text-[#6b7280] px-2 py-1 rounded-md uppercase tracking-wider">On-Chain</span>
+                          <span className="text-[0.65rem] bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e] px-2 py-1 rounded-md uppercase tracking-wider">Active</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="bg-[#1a2235] rounded-xl p-4">
+                          <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">Loan Amount</p>
+                          <p className="text-2xl font-bold text-white">${loanAccount.amount}<span className="text-[0.7rem] font-normal text-[#6b7280] ml-1">USDC</span></p>
+                        </div>
+                        <div className="bg-[#1a2235] rounded-xl p-4">
+                          <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">Deposit Held</p>
+                          <p className="text-2xl font-bold text-[#f59e0b]">${loanAccount.intentDeposit}<span className="text-[0.7rem] font-normal text-[#6b7280] ml-1">USDC</span></p>
+                        </div>
+                        <div className="bg-[#1a2235] rounded-xl p-4">
+                          <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">{t.dueDate}</p>
+                          <p className="text-base font-semibold text-white">{new Date(loanAccount.dueDate).toLocaleDateString("en-GB")}</p>
+                          {(() => {
+                            const msLeft = new Date(loanAccount.dueDate).getTime() - now;
+                            const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+                            const hoursLeft = Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const urgent = daysLeft <= 2;
+                            if (msLeft <= 0) return <p className="text-[0.7rem] text-red-400 mt-1 font-medium">Overdue</p>;
+                            return <p className={`text-[0.7rem] mt-1 font-medium ${urgent ? "text-[#f59e0b]" : "text-[#6b7280]"}`}>{daysLeft}d {hoursLeft}h remaining</p>;
+                          })()}
+                        </div>
+                        <div className="bg-[#1a2235] rounded-xl p-4">
+                          <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">Wallet</p>
+                          <p className="text-[0.75rem] font-mono text-[#94a3b8] truncate">{publicKey?.toString().slice(0, 8)}...</p>
+                        </div>
+                      </div>
+                      <a href={`https://explorer.solana.com/address/${publicKey?.toString()}?cluster=devnet`} target="_blank" rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[0.75rem] text-[#7B2FE0] hover:text-purple-300 transition-colors mt-1">
+                        View on Solana Explorer
+                      </a>
+                    </div>
+                    <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                      <h3 className="text-[0.95rem] font-semibold text-white mb-5">{t.repayNow}</h3>
+                      <div className="space-y-2 mb-5">
+                        <div className="flex justify-between items-center py-2.5 border-b border-white/[0.04]">
+                          <span className="text-[0.825rem] text-[#94a3b8]">Principal + interest</span>
+                          <span className="text-[0.875rem] font-semibold text-white">${(loanAccount.amount + parseFloat(((loanAccount.amount * interestRate / 100 * 14) / 365).toFixed(2))).toFixed(2)} USDC</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2.5">
+                          <span className="text-[0.825rem] text-[#94a3b8]">Deposit returned</span>
+                          <span className="text-[0.875rem] font-semibold text-[#22c55e]">+${loanAccount.intentDeposit} USDC</span>
+                        </div>
+                      </div>
+                      <p className="text-[0.75rem] text-[#22c55e] mb-5">Repay on time to unlock a higher limit</p>
+                      {txError && <div className="bg-red-950/40 border border-red-900/40 rounded-xl px-4 py-3 mb-4"><p className="text-[0.78rem] text-red-400">{txError}</p></div>}
+                      {status && <p className="text-[0.78rem] text-[#9ca3af] mb-4 flex items-center gap-2"><span className="w-3.5 h-3.5 border-2 border-[#9ca3af] border-t-transparent rounded-full animate-spin" />{status}</p>}
+                      <button onClick={handleRepay} disabled={loading}
+                        className={`w-full h-12 rounded-xl font-semibold text-[0.9rem] transition-all duration-200 ${loading ? "bg-[#1c1e24] text-[#4b5563] cursor-not-allowed" : "bg-[#16a34a] hover:bg-[#15803d] text-white shadow-lg shadow-green-900/25 cursor-pointer"}`}>
+                        {loading ? t.processing : "Repay Now"}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {(!loanAccount || loanAccount.repaid) && (
+                  <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                    <h3 className="text-[1rem] font-bold text-white mb-5">{t.borrowNow}</h3>
+                    {eligibility && !eligibility.eligible && (
+                      <div className="bg-[#1c1510] border border-[#f59e0b]/20 rounded-xl px-4 py-3.5 mb-5">
+                        <p className="text-[0.8rem] text-[#f59e0b] font-medium mb-1">Not eligible yet</p>
+                        <p className="text-[0.75rem] text-[#92400e] leading-relaxed">{eligibility.reason}</p>
+                        {eligibility.details && (
+                          <div className="mt-2.5 space-y-1">
+                            {[{ label: "Basic filter", pass: eligibility.details.layer1 }, { label: "Human signal", pass: eligibility.details.layer2 }, { label: "Financial intent", pass: eligibility.details.layer3 }].map((l) => (
+                              <div key={l.label} className="flex items-center gap-2 text-[0.72rem]">
+                                <span className={l.pass ? "text-[#22c55e]" : "text-[#6b7280]"}>{l.pass ? "✓" : "·"}</span>
+                                <span className={l.pass ? "text-[#9ca3af]" : "text-[#4b5563]"}>{l.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[0.7rem] text-[#94a3b8] uppercase tracking-widest">{t.amount}</label>
+                      <div className="flex items-center gap-1.5 bg-[#1a2235] border border-white/[0.15] rounded-lg px-3 py-1.5">
+                        <span className="text-[0.75rem] text-[#94a3b8]">$</span>
+                        <input type="number" min={1} max={maxAmount} value={amount} onChange={(e) => setAmount(Number(e.target.value))}
+                          className="w-10 bg-transparent text-[0.875rem] font-semibold text-white text-right outline-none" />
+                        <span className="text-[0.72rem] text-[#94a3b8]">USDC</span>
+                      </div>
+                    </div>
+                    <input type="range" min={1} max={maxAmount} value={amount} onChange={(e) => setAmount(Number(e.target.value))}
+                      className="w-full h-1.5 rounded-full appearance-none bg-[#1c1e24] mb-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#7B2FE0] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg"
+                      style={{ background: `linear-gradient(to right, #7B2FE0 ${(amount / maxAmount) * 100}%, #1c1e24 ${(amount / maxAmount) * 100}%)` }} />
+                    <div className="flex justify-between text-[0.65rem] text-[#6b7280] mb-5"><span>$1</span><span>${maxAmount}</span></div>
+                    <div className="grid grid-cols-3 gap-2 mb-5">
+                      {[10, 25, maxAmount].map((v, i) => (
+                        <button key={i} onClick={() => setAmount(v)}
+                          className={`h-9 rounded-lg text-[0.8rem] font-medium transition-all duration-150 ${amount === v ? "bg-[#7B2FE0]/20 border border-[#7B2FE0]/40 text-white" : "bg-[#1a2235] border border-white/[0.15] text-[#94a3b8] hover:text-white hover:border-purple-500/50"}`}>
+                          {i === 2 ? "MAX" : `$${v}`}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="space-y-0 mb-5 bg-[#1a2235] rounded-xl overflow-hidden">
+                      {[
+                        { label: "You receive", value: `$${amount.toFixed(2)} USDC`, color: "text-white" },
+                        { label: "Intent deposit", value: `$${intentDeposit.toFixed(2)} USDC`, color: "text-[#f59e0b]" },
+                        { label: "Total repayment", value: `$${totalRepay} USDC`, color: "text-white" },
+                        { label: "Due date", value: `${dueDate.toLocaleDateString("en-GB")} (14 days)`, color: "text-white" },
+                        { label: "Interest", value: `$${interest} (${(interestRate).toFixed(0)}% APR)`, color: "text-white" },
+                      ].map((row, idx, arr) => (
+                        <div key={row.label} className={`flex justify-between items-center px-4 py-3 ${idx < arr.length - 1 ? "border-b border-white/[0.04]" : ""}`}>
+                          <span className="text-[0.8rem] text-[#94a3b8]">{row.label}</span>
+                          <span className={`text-[0.85rem] font-semibold ${row.color}`}>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[0.7rem] text-[#6b7280] mb-5">* The $2 deposit is not a fee - it is returned when you repay.</p>
+                    {txError && <div className="bg-red-950/40 border border-red-900/40 rounded-xl px-4 py-3 mb-4"><p className="text-[0.78rem] text-red-400">{txError}</p></div>}
+                    {status && <p className="text-[0.78rem] text-[#9ca3af] mb-4 flex items-center gap-2"><span className="w-3.5 h-3.5 border-2 border-[#9ca3af] border-t-transparent rounded-full animate-spin" />{status}</p>}
+                    <button onClick={handleBorrow} disabled={loading || (eligibility !== null && !eligibility.eligible)}
+                      className={`w-full h-12 rounded-xl font-semibold text-[0.9rem] transition-all duration-200 ${loading || (eligibility !== null && !eligibility.eligible) ? "bg-[#1c1e24] text-[#4b5563] cursor-not-allowed" : "bg-[#7B2FE0] hover:bg-[#6025c0] text-white shadow-lg shadow-purple-900/25 cursor-pointer"}`}>
+                      {loading ? t.processing : `Take Loan - $${amount} USDC`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      )}
+    </div>
+  );
+}

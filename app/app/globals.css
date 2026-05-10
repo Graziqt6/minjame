@@ -1,3 +1,14 @@
 @import "tailwindcss";
 
-html, body { background: #0d0f1e; color: white; }
+html, body {
+  background: #050816;
+  color: white;
+}
+
+body {
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-syne), sans-serif;
+}

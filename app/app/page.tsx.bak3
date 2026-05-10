@@ -375,12 +375,12 @@ export default function Home() {
     return "en";
   });
   const t = T[lang];
-  const [mode, setMode] = useState<"simulation" | "devnet">(() => {
+  const [mode, setMode] = useState<"simulation" | "devnet" | null>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("minjame_mode");
       if (saved === "simulation" || saved === "devnet") return saved;
     }
-    return "simulation";
+    return null;
   });
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
@@ -464,155 +464,194 @@ export default function Home() {
 
   if (showSplash) return <SplashScreen onEnter={() => setShowSplash(false)} />;
 
+  if (!mode) {
+    return (
+      <ModeSelect lang="en" onSelect={(selected) => { setMode(selected); localStorage.setItem("minjame_mode", selected); }} />
+    );
+  }
 
+  if (repaidSuccess) {
+    return (
+      <div className="min-h-screen bg-[#050816] flex items-center justify-center px-6">
+        <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-10 max-w-sm w-full text-center shadow-2xl">
+          <div className="w-14 h-14 bg-[#052e16] rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12l5 5L19 7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="text-[1.4rem] font-semibold text-[#22c55e] mb-2">Repaid!</h2>
+          <p className="text-[0.875rem] text-white mb-3">You unlocked higher borrowing power</p>
+          {prevScore !== null && userScore && userScore.score > prevScore && (
+            <div className="inline-flex items-center gap-2 bg-[#052e16] border border-[#22c55e]/20 rounded-lg px-3 py-1.5 mb-4">
+              <span className="text-[0.8rem] text-[#6b7280]">{t.score}</span>
+              <span className="text-[0.8rem] text-[#6b7280]">{prevScore}</span>
+              <span className="text-[0.75rem] text-[#4b5563]">to</span>
+              <span className="text-[0.9rem] font-bold text-[#22c55e]">{userScore.score}</span>
+              <span className="text-[0.75rem] font-semibold text-[#22c55e]">+{userScore.score - prevScore}</span>
+            </div>
+          )}
+          <p className="text-[0.8rem] text-[#6b7280] mb-6">$2 deposit has been returned to your wallet.</p>
+          <a href={`https://explorer.solana.com/tx/${repaidSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-[0.8rem] text-[#9B3FE0] hover:text-purple-300 transition-colors">
+            View on Solana Explorer
+          </a>
+          <button onClick={() => setRepaidSuccess(null)}
+            className="mt-6 w-full h-10 rounded-xl bg-[#1c1e24] text-[#9ca3af] text-sm hover:text-white hover:bg-[#22252d] transition-all">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-
+  if (borrowSuccess) {
+    return (
+      <div className="min-h-screen bg-[#050816] flex items-center justify-center px-6">
+        <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-10 max-w-sm w-full text-center shadow-2xl">
+          <div className="w-14 h-14 bg-[#1e1235] rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#7B2FE0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="text-[1.4rem] font-semibold text-white mb-2">${borrowSuccess.amount} USDC Sent</h2>
+          <p className="text-[0.875rem] text-[#9ca3af] mb-6">Funds are on their way to your wallet.</p>
+          <a href={`https://explorer.solana.com/tx/${borrowSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-[0.8rem] text-[#9B3FE0] hover:text-purple-300 transition-colors">
+            View on Solana Explorer
+          </a>
+          <button onClick={() => setBorrowSuccess(null)}
+            className="mt-6 w-full h-10 rounded-xl bg-[#1c1e24] text-[#9ca3af] text-sm hover:text-white hover:bg-[#22252d] transition-all">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minHeight:"100vh", background:"#050816", color:"#f0eef8", fontFamily:"'DM Sans', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
-
-      {/* MODALS */}
-      {repaidSuccess && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(5,8,22,0.9)", backdropFilter:"blur(8px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-          <div style={{ background:"#0E1225", border:"1px solid rgba(34,197,94,0.2)", borderRadius:24, padding:48, maxWidth:400, width:"100%", textAlign:"center" }}>
-            <div style={{ width:56, height:56, background:"rgba(34,197,94,0.1)", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 24px" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:24, fontWeight:700, color:"#22c55e", marginBottom:8 }}>Repaid!</h2>
-            <p style={{ fontSize:14, color:"#8B8FA8", marginBottom:16 }}>You unlocked higher borrowing power</p>
-            {prevScore !== null && userScore && userScore.score > prevScore && (
-              <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(34,197,94,0.08)", border:"1px solid rgba(34,197,94,0.2)", borderRadius:10, padding:"8px 16px", marginBottom:16 }}>
-                <span style={{ fontSize:13, color:"#6b7280" }}>{prevScore}</span>
-                <span style={{ fontSize:12, color:"#4b5563" }}>→</span>
-                <span style={{ fontSize:16, fontWeight:700, color:"#22c55e" }}>{userScore.score}</span>
-                <span style={{ fontSize:12, color:"#22c55e", fontWeight:600 }}>+{userScore.score - prevScore}</span>
-              </div>
-            )}
-            <p style={{ fontSize:13, color:"#6b7280", marginBottom:24 }}>$2 deposit returned to your wallet.</p>
-            <a href={`https://explorer.solana.com/tx/${repaidSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B5CF6", display:"block", marginBottom:16 }}>View on Solana Explorer</a>
-            <button onClick={() => setRepaidSuccess(null)} style={{ width:"100%", height:44, borderRadius:12, background:"#1c1e24", color:"#9ca3af", border:"none", fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Back to Dashboard</button>
-          </div>
+    <div className="min-h-screen bg-[#050816] text-white font-sans">
+      <header className="h-14 border-b border-white/[0.05] flex items-center justify-between px-6 bg-[#080d1a]">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="Minjame" style={{ width: 48, height: 48, objectFit: "contain" }} />
+          <img src="/wordmark.png" alt="MINJAME" style={{ height: 26, objectFit: "contain" }} />
+          <span className="hidden sm:inline text-[0.7rem] text-[#374151] tracking-widest uppercase ml-1">
+            {mode === "simulation" ? "Simulation" : "Devnet"}
+          </span>
         </div>
-      )}
-      {borrowSuccess && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(5,8,22,0.9)", backdropFilter:"blur(8px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-          <div style={{ background:"#0E1225", border:"1px solid rgba(108,53,232,0.3)", borderRadius:24, padding:48, maxWidth:400, width:"100%", textAlign:"center" }}>
-            <div style={{ width:56, height:56, background:"rgba(108,53,232,0.1)", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 24px" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:24, fontWeight:700, color:"#f0eef8", marginBottom:8 }}>${borrowSuccess.amount} USDC Sent</h2>
-            <p style={{ fontSize:14, color:"#8B8FA8", marginBottom:24 }}>Funds are on their way to your wallet.</p>
-            <a href={`https://explorer.solana.com/tx/${borrowSuccess.txSig}?cluster=devnet`} target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B5CF6", display:"block", marginBottom:16 }}>View on Solana Explorer</a>
-            <button onClick={() => setBorrowSuccess(null)} style={{ width:"100%", height:44, borderRadius:12, background:"#1c1e24", color:"#9ca3af", border:"none", fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Back to Dashboard</button>
-          </div>
-        </div>
-      )}
-
-      {/* HEADER */}
-      <header style={{ height:72, borderBottom:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 48px", background:"rgba(5,8,22,0.95)", backdropFilter:"blur(12px)", position:"sticky", top:0, zIndex:50 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <img src="/logo.png" alt="MINJAME" style={{ width:44, height:44, objectFit:"contain", mixBlendMode:"screen" }} />
-          <img src="/wordmark.png" alt="MINJAME" style={{ height:28, objectFit:"contain", mixBlendMode:"screen" }} />
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
-            {(["simulation","devnet"] as const).map(m => (
-              <button key={m} onClick={() => { setMode(m); localStorage.setItem("minjame_mode", m); }}
-                style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, cursor:"pointer", border:"none", fontFamily:"inherit", transition:"all 0.2s",
-                  background: mode === m ? (m === "simulation" ? "rgba(245,158,11,0.15)" : "#6C35E8") : "transparent",
-                  color: mode === m ? (m === "simulation" ? "#f59e0b" : "#fff") : "#555A72" }}>
-                {m === "simulation" ? "Simulation" : "Devnet"}
-              </button>
-            ))}
-          </div>
-          <div style={{ position:"relative" }}>
+        <div className="flex items-center gap-2">
+          <div className="relative">
             <button onClick={() => setShowIdInfo(!showIdInfo)}
-              style={{ height:36, padding:"0 14px", borderRadius:8, background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", color:"#8B8FA8", fontSize:13, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}>
+              className="h-8 px-3 rounded-lg bg-[#1c1e24] border border-white/[0.06] text-[#9ca3af] text-[0.7rem] font-semibold hover:text-white hover:border-white/10 transition-all flex items-center gap-1">
               {lang === "en" ? "EN" : "ID"}
               <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
             </button>
             {showIdInfo && (
-              <div style={{ position:"absolute", top:44, right:0, zIndex:50, background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:12, overflow:"hidden", width:120, boxShadow:"0 20px 40px rgba(0,0,0,0.4)" }}>
-                {["en","id"].map(l => (
+              <div className="absolute top-10 right-0 z-50 bg-[#0d1525] border border-white/[0.06] rounded-xl overflow-hidden shadow-2xl w-28">
+                {["en", "id"].map((l) => (
                   <button key={l} onClick={() => { setLang(l as "en"|"id"); localStorage.setItem("minjame_lang", l); setShowIdInfo(false); }}
-                    style={{ width:"100%", textAlign:"left", padding:"10px 16px", fontSize:13, cursor:"pointer", border:"none", fontFamily:"inherit", background: lang === l ? "rgba(255,255,255,0.06)" : "transparent", color: lang === l ? "#f0eef8" : "#8B8FA8" }}>
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${lang === l ? "text-white bg-white/[0.06]" : "text-[#6b7280] hover:text-white hover:bg-white/[0.04]"}`}>
                     {l === "en" ? "English" : "Indonesia"}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          <WalletMultiButton style={{ height:"36px", padding:"0 18px", fontSize:"0.8rem", fontWeight:600, borderRadius:"10px", background:"#6C35E8", border:"none" }} />
+          <WalletMultiButton style={{ height: "32px", padding: "0 14px", fontSize: "0.8rem", fontWeight: 500, borderRadius: "10px", background: "#7B2FE0", border: "none" }} />
         </div>
       </header>
 
-      <div style={{ padding:"8px 48px", background: mode === "simulation" ? "rgba(245,158,11,0.06)" : "rgba(108,53,232,0.06)", borderBottom:"1px solid " + (mode === "simulation" ? "rgba(245,158,11,0.15)" : "rgba(108,53,232,0.15)"), display:"flex", alignItems:"center", gap:8 }}>
-        <span style={{ width:6, height:6, borderRadius:"50%", background: mode === "simulation" ? "#f59e0b" : "#8B5CF6", display:"inline-block" }} />
-        <span style={{ fontSize:12, color: mode === "simulation" ? "#f59e0b" : "#8B5CF6" }}>
-          {mode === "simulation" ? "Simulation Mode — no real transactions" : "Devnet Mode — real on-chain transactions"}
-        </span>
+      <div className={`w-full py-1.5 px-4 flex items-center text-xs ${mode === "simulation" ? "bg-yellow-500/10 border-b border-yellow-500/20" : "bg-purple-500/10 border-b border-purple-500/20"}`}>
+        <div className="flex items-center gap-2 max-w-5xl mx-auto w-full justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`w-1.5 h-1.5 rounded-full ${mode === "simulation" ? "bg-yellow-400" : "bg-purple-400"}`} />
+            <span className={mode === "simulation" ? "text-yellow-400" : "text-purple-400"}>
+              {mode === "simulation" ? "Simulation Mode - no real transactions" : "Devnet Mode - real on-chain transactions"}
+            </span>
+          </div>
+          <button onClick={() => { const next = mode === "simulation" ? "devnet" : "simulation"; setMode(next); localStorage.setItem("minjame_mode", next); }}
+            className={`text-[0.7rem] px-2.5 py-1 rounded-md border transition-all ${mode === "simulation" ? "border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10" : "border-purple-500/30 text-purple-400 hover:bg-purple-500/10"}`}>
+            {mode === "simulation" ? "Switch to Devnet" : "Switch to Simulation"}
+          </button>
+        </div>
       </div>
 
-      <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
+      {!connected && (
+        <main className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-3">MINJAME</h1>
+          <p className="text-[1rem] text-[#9ca3af] mb-2">Onchain credit for everyday crypto users</p>
+          <p className="text-[0.85rem] text-[#4b5563] mb-10">No collateral. No KYC. Build your onchain credit score.</p>
+          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            {[{ icon: "🔒", label: "No collateral required" }, { icon: "📋", label: "No KYC or documents" }, { icon: "📈", label: "Build permanent onchain credit" }].map((f) => (
+              <div key={f.label} className="flex items-center gap-2 bg-[#0d1525] border border-white/[0.05] rounded-xl px-4 py-2.5">
+                <span className="text-base">{f.icon}</span>
+                <span className="text-[0.8rem] text-[#9ca3af]">{f.label}</span>
+              </div>
+            ))}
+          </div>
+          <WalletMultiButton style={{ height: "48px", padding: "0 28px", fontSize: "0.925rem", fontWeight: 600, borderRadius: "12px", background: "#7B2FE0", border: "none" }} />
+        </main>
+      )}
+
+      {connected && (
+        <main className="max-w-[1100px] mx-auto px-5 py-8">
           {loadingData ? (
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"128px 0", color:"#4b5563", fontSize:14, gap:12 }}>
+            <div className="flex items-center justify-center py-32 text-[#4b5563] text-sm gap-3">
               <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7B2FE0] rounded-full animate-spin" />
               Loading your onchain data...
             </div>
           ) : (
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 420px", gap:20 }}>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5">
               <div className="flex flex-col gap-4">
-                <div style={{ background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:20, padding:28 }}>
-                  <div style={{ display:"flex", alignItems:"flex-start", gap:20, marginBottom:24 }}>
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                  <div className="flex items-start gap-5">
                     <ScoreRing score={userScore?.score ?? 0} />
-                    <div style={{ flex:1 }}>
-                      <p style={{ fontSize:11, color:"#555A72", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6 }}>{t.level}</p>
-                      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
-                        <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:700, color:"#f0eef8", lineHeight:1 }}>{currentTier?.name ?? "Baru"}</h2>
-                        <span style={{ fontSize:10, background:"#181D35", border:"1px solid rgba(255,255,255,0.08)", color:"#8B8FA8", padding:"3px 8px", borderRadius:6, textTransform:"uppercase", letterSpacing:"0.08em" }}>On-Chain</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[0.7rem] text-[#6b7280] uppercase tracking-widest mb-1.5">{t.level}</p>
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <h2 className="text-2xl font-bold text-white leading-none">{currentTier?.name ?? "Baru"}</h2>
+                        <span className="text-[0.65rem] bg-[#1c1e24] border border-white/[0.08] text-[#9ca3af] px-2 py-0.5 rounded-md uppercase tracking-wider font-medium">On-Chain</span>
                       </div>
-                      <p style={{ fontSize:13, color:"#555A72", lineHeight:1.5 }}>{t.increases}</p>
+                      <p className="text-[0.78rem] text-[#6b7280] leading-relaxed">{t.increases}</p>
                     </div>
                   </div>
-                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                  <div className="grid grid-cols-2 gap-3 mt-5">
                     {[
-                      { lbl: t.limit, val: `$${maxAmount}`, unit: "USDC", color: "#f0eef8" },
-                      { lbl: t.interestYear, val: `${(interestRate).toFixed(0)}`, unit: "%", color: "#f0eef8" },
-                      { lbl: "Loans repaid", val: `${userScore?.repaymentCount ?? 0}`, unit: "total", color: "#f0eef8" },
-                      { lbl: "On-time", val: `${userScore?.onTimeCount ?? 0}`, unit: `/ ${userScore?.repaymentCount ?? 0}`, color: "#22c55e" },
+                      { lbl: t.limit, val: `$${maxAmount}`, unit: "USDC", color: "text-white" },
+                      { lbl: t.interestYear, val: `${(interestRate).toFixed(0)}`, unit: "%", color: "text-white" },
+                      { lbl: "Loans repaid", val: `${userScore?.repaymentCount ?? 0}`, unit: "total", color: "text-white" },
+                      { lbl: "On-time", val: `${userScore?.onTimeCount ?? 0}`, unit: `/ ${userScore?.repaymentCount ?? 0}`, color: "text-[#22c55e]" },
                     ].map((s) => (
-                      <div key={s.lbl} style={{ background:"#181D35", borderRadius:14, padding:16 }}>
-                        <p style={{ fontSize:10, color:"#8B8FA8", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6 }}>{s.lbl}</p>
-                        <p style={{ fontSize:22, fontWeight:700, color:s.color }}>{s.val}<span style={{ fontSize:12, fontWeight:400, color:"#555A72", marginLeft:4 }}>{s.unit}</span></p>
+                      <div key={s.lbl} className="bg-[#1a2235] rounded-xl p-4">
+                        <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-1.5">{s.lbl}</p>
+                        <p className={`text-xl font-bold ${s.color}`}>{s.val}<span className="text-[0.75rem] font-normal text-[#6b7280] ml-1">{s.unit}</span></p>
                       </div>
                     ))}
                   </div>
-                  {publicKey && <p style={{ marginTop:16, fontSize:11, color:"#555A72", fontFamily:"monospace", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{publicKey.toString()}</p>}
+                  {publicKey && <p className="mt-4 text-[0.72rem] text-[#6b7280] font-mono truncate">{publicKey.toString()}</p>}
                 </div>
 
-                <div style={{ background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:20, padding:"20px 24px" }}>
-                  <p style={{ fontSize:14, color:"#c4cde0", lineHeight:1.6, marginBottom:6 }}>{t.yourLimit}</p>
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl px-6 py-5">
+                  <p className="text-[0.875rem] text-[#c4cde0] leading-relaxed mb-1">{t.yourLimit}</p>
                   {userScore && userScore.tier >= 3
-                    ? <p style={{ fontSize:13, color:"#22c55e" }}>{t.highest}</p>
-                    : <p style={{ fontSize:13, color:"#8B5CF6" }}>{t.repayUnlock}</p>}
-                  <div style={{ marginTop:12, fontSize:12, color:"#555A72" }}>· {t.allData}</div>
+                    ? <p className="text-[0.8rem] text-[#22c55e]">{t.highest}</p>
+                    : <p className="text-[0.8rem] text-[#9B3FE0]">{t.repayUnlock}</p>}
+                  <div className="mt-4 text-[0.72rem] text-[#94a3b8]">· {t.allData}</div>
                 </div>
 
-                <div style={{ background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:20, padding:24 }}>
-                  <p style={{ fontSize:11, color:"#8B8FA8", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:16 }}>Tier Progression</p>
-                  <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <div className="bg-[#0d1525] border border-white/[0.06] rounded-2xl p-6">
+                  <p className="text-[0.65rem] text-[#94a3b8] uppercase tracking-widest mb-4">Tier Progression</p>
+                  <div className="flex flex-col gap-2">
                     {TIERS.map((tier, i) => {
                       const isCurrent = userScore?.tier === i;
                       const isPast = (userScore?.tier ?? 0) > i;
                       return (
-                        <div key={tier.name} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", borderRadius:12, padding:"12px 16px", background: isCurrent ? "#181D35" : "transparent", border: isCurrent ? "1px solid rgba(255,255,255,0.08)" : "1px solid transparent" }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                            <span style={{ width:8, height:8, borderRadius:"50%", flexShrink:0, background: isCurrent ? "#8B5CF6" : isPast ? "#555A72" : "#1e2027", display:"inline-block" }} />
-                            <span style={{ fontSize:13, fontWeight:500, color: isCurrent ? "#f0eef8" : isPast ? "#555A72" : "#8B8FA8" }}>{tier.name}</span>
-                            {isCurrent && <span style={{ fontSize:10, background:"rgba(34,197,94,0.1)", color:"#22c55e", border:"1px solid rgba(34,197,94,0.2)", padding:"2px 6px", borderRadius:5, textTransform:"uppercase", letterSpacing:"0.08em" }}>current</span>}
+                        <div key={tier.name} className={`flex items-center justify-between rounded-xl px-4 py-3 ${isCurrent ? "bg-[#080d1a] border border-white/[0.08]" : ""}`}>
+                          <div className="flex items-center gap-3">
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isCurrent ? TIER_COLORS[i].dot : isPast ? TIER_COLORS[i].dot : "bg-[#1e2027]"}`} />
+                            <span className={`text-[0.825rem] font-medium ${isCurrent ? "text-white" : isPast ? "text-[#6b7280]" : "text-[#9ca3af]"}`}>{tier.name}</span>
+                            {isCurrent && <span className="text-[0.6rem] bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20 px-1.5 py-0.5 rounded-md uppercase tracking-wider">current</span>}
                           </div>
-                          <span style={{ fontSize:12, color:"#555A72" }}>${tier.limit} · {tier.rate}% APR</span>
+                          <span className="text-[0.78rem] text-[#94a3b8]">${tier.limit} · {tier.rate}% APR</span>
                         </div>
                       );
                     })}
@@ -755,6 +794,7 @@ export default function Home() {
             </div>
           )}
         </main>
+      )}
     </div>
   );
 }
