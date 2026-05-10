@@ -399,7 +399,7 @@ export default function Home() {
 
   useEffect(() => {
     if (mode === "simulation") {
-      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
+      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 }); setLoanAccount(null); setEligibility(null);
       setLoanAccount(null);
       setEligibility({ eligible: true, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
       return;
@@ -519,7 +519,7 @@ export default function Home() {
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
             {(["simulation","devnet"] as const).map(m => (
-              <button key={m} onClick={() => { setMode(m); localStorage.setItem("minjame_mode", m); }}
+              <button key={m} onClick={() => { setMode(m); localStorage.setItem("minjame_mode", m); setUserScore(null); setLoanAccount(null); setEligibility(null); }}
                 style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, cursor:"pointer", border:"none", fontFamily:"inherit", transition:"all 0.2s",
                   background: mode === m ? (m === "simulation" ? "rgba(245,158,11,0.15)" : "#6C35E8") : "transparent",
                   color: mode === m ? (m === "simulation" ? "#f59e0b" : "#fff") : "#555A72" }}>
