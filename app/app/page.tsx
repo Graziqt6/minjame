@@ -386,7 +386,7 @@ export default function Home() {
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
-  const interestRate  = currentTier?.rate ?? 0.18;
+  const interestRate  = TIERS[userScore?.tier ?? 0]?.rate ?? 18;
   const interest      = parseFloat(((amount * interestRate / 100 * 14) / 365).toFixed(2));
   const totalRepay    = (amount + interest).toFixed(2);
   const intentDeposit = 2;
