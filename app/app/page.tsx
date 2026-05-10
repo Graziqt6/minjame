@@ -229,7 +229,7 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
       <section id="tiers" style={{ padding:"100px 48px" }}>
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
           <div style={{ fontSize:12, fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", color:"#6C35E8", marginBottom:16 }}>Tier System</div>
-          <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:"clamp(28px,4vw,48px)", fontWeight:700, lineHeight:1.1, letterSpacing:"-0.02em", marginBottom:16 }}>The better you behave,<br />the cheaper you borrow</h2>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:"clamp(28px,4vw,48px)", fontWeight:700, lineHeight:1.1, letterSpacing:"-0.02em", marginBottom:16 }}>The better you behave,<br />the more you can borrow</h2>
           <p style={{ fontSize:17, color:"#8B8FA8", lineHeight:1.75, maxWidth:560, fontWeight:300, marginBottom:60 }}>Every loan repaid on time moves you up. Four tiers, each unlocks more capital at a lower rate.</p>
           <table style={{ width:"100%", borderCollapse:"collapse", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, overflow:"hidden" }}>
             <thead>
@@ -241,10 +241,11 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
             </thead>
             <tbody>
               {[
-                {tier:"0",name:"Baru",col:"None — first loan",limit:"$10",apr:"18%",badge:"Start here"},
-                {tier:"1",name:"Terpercaya",col:"120%",limit:"$75",apr:"13%",badge:null},
-                {tier:"2",name:"Andalan",col:"100%",limit:"$200",apr:"9%",badge:null},
-                {tier:"3",name:"Mitra",col:"75%",limit:"$500",apr:"6%",badge:null},
+                {tier:"0",name:"Baru",col:"None — first loan",limit:"$10",apr:"15%",badge:"Start here"},
+                {tier:"1",name:"Terpercaya",col:"None",limit:"$25",apr:"12%",badge:null},
+                {tier:"2",name:"Andalan",col:"None",limit:"$50",apr:"10%",badge:null},
+                {tier:"3",name:"Mitra",col:"None",limit:"$100",apr:"8%",badge:null},
+                {tier:"4",name:"Utama",col:"None",limit:"$250",apr:"6%",badge:null},
               ].map((row,i,arr) => (
                 <tr key={row.tier}>
                   <td style={{ padding:"20px 24px", fontSize:15, borderBottom: i < arr.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
