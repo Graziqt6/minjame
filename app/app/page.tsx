@@ -385,7 +385,7 @@ export default function Home() {
   });
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
-  const maxAmount     = eligibility?.maxAmount ?? currentTier?.limit ?? 10;
+  const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
   const interestRate  = currentTier?.rate ?? 0.18;
   const interest      = parseFloat(((amount * interestRate / 100 * 14) / 365).toFixed(2));
   const totalRepay    = (amount + interest).toFixed(2);
@@ -401,7 +401,7 @@ export default function Home() {
     if (mode === "simulation") {
       setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
       setLoanAccount(null);
-      setEligibility({ eligible: true, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
+      setEligibility({ eligible: true, maxAmount: currentTierRef, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
       return;
     }
     if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); return; }
