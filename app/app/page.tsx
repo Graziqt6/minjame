@@ -39,11 +39,12 @@ const T = {
 
 import { ModeSelect } from "./mode-select";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 import { fetchUserScore, fetchActiveLoan, createLoan, repayLoan } from "../lib/solana";
 import { checkEligibility } from "../lib/eligibility";
-import { TIERS, APR_BRACKETS } from "../lib/constants";
+import { TIERS, APR_BRACKETS, RPC_URL } from "../lib/constants";
 
 interface UserScore {
   score: number; tier: number; repaymentCount: number; onTimeCount: number;
@@ -358,6 +359,7 @@ export default function Home() {
   const wallet = { publicKey, connected, ...walletRest };
 
   const [showSplash, setShowSplash]       = useState(true);
+  const [bypassElig, setBypassElig]       = useState(false);
   const [userScore, setUserScore]         = useState<UserScore | null>(null);
   const [loanAccount, setLoanAccount]     = useState<LoanAccount | null>(null);
   const [eligibility, setEligibility]     = useState<EligibilityResult | null>(null);
@@ -393,13 +395,26 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); setBypassElig(false); return; }
     if (mode === "simulation") {
-      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
       setLoanAccount(null);
-      setEligibility({ eligible: true, maxAmount: TIERS[0].limit, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
+      const runElig = async () => {
+        try {
+          const elig = await checkEligibility(publicKey.toString());
+          setEligibility(elig);
+          if (elig.eligible || bypassElig) {
+            setUserScore({ score: bypassElig && !elig.eligible ? 50 : 100, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
+          } else {
+            setUserScore(null);
+          }
+        } catch {
+          setEligibility({ eligible: false, reason: "Could not read wallet history." });
+          setUserScore(null);
+        }
+      };
+      runElig();
       return;
     }
-    if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); return; }
     const load = async () => {
       setLoadingData(true);
       try {
@@ -568,7 +583,43 @@ export default function Home() {
       </div>
 
       <main style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
-          {loadingData ? (
+
+          {/* NOT CONNECTED */}
+          {!connected && (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"60vh", textAlign:"center", gap:24 }}>
+              <div style={{ fontSize:40 }}>👋</div>
+              <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:700, color:"#f0eef8" }}>Connect your wallet to start</h2>
+              <p style={{ fontSize:15, color:"#8B8FA8", maxWidth:380, lineHeight:1.7 }}>Simulation mode will check your real wallet history — then let you borrow without any real funds.</p>
+              <WalletMultiButton style={{ height:"44px", padding:"0 28px", fontSize:"0.9rem", fontWeight:600, borderRadius:"12px", background:"#6C35E8", border:"none" }} />
+              <p style={{ fontSize:12, color:"#555A72" }}>No real funds at risk · Solana Devnet</p>
+            </div>
+          )}
+
+          {/* CONNECTED BUT NOT ELIGIBLE */}
+          {connected && eligibility && !eligibility.eligible && !bypassElig && (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"60vh", textAlign:"center", gap:20 }}>
+              <div style={{ fontSize:40 }}>🔍</div>
+              <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:700, color:"#f0eef8" }}>Wallet not eligible yet</h2>
+              <p style={{ fontSize:15, color:"#8B8FA8", maxWidth:420, lineHeight:1.7 }}>{eligibility.reason ?? "Your wallet history doesn't meet the minimum criteria yet."}</p>
+              <div style={{ background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, padding:"20px 28px", maxWidth:400, width:"100%", textAlign:"left" }}>
+                <p style={{ fontSize:12, color:"#555A72", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:12 }}>Eligibility Check</p>
+                {eligibility.signals && Object.entries(eligibility.signals).map(([k,v]) => (
+                  <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.05)", fontSize:13 }}>
+                    <span style={{ color:"#8B8FA8" }}>{k}</span>
+                    <span style={{ color: v ? "#22c55e" : "#ef4444" }}>{v ? "✓ Pass" : "✗ Fail"}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setBypassElig(true)}
+                style={{ marginTop:8, padding:"12px 28px", borderRadius:12, background:"rgba(108,53,232,0.15)", border:"1px solid rgba(108,53,232,0.3)", color:"#8B5CF6", fontSize:14, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                Try Simulation Anyway
+              </button>
+              <p style={{ fontSize:12, color:"#555A72" }}>Score starts at 50 · Simulation only</p>
+            </div>
+          )}
+
+          {/* MAIN DASHBOARD - connected + (eligible or bypassed) */}
+          {connected && (eligibility?.eligible || bypassElig) && loadingData ? (
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"128px 0", color:"#4b5563", fontSize:14, gap:12 }}>
               <div className="w-4 h-4 border-2 border-[#4b5563] border-t-[#7B2FE0] rounded-full animate-spin" />
               Loading your onchain data...
@@ -767,7 +818,7 @@ export default function Home() {
               </div>
             </div>
           )}
-        </main>
+      </main>
     </div>
   );
 }
