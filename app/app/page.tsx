@@ -47,6 +47,7 @@ import { TIERS, APR_BRACKETS } from "../lib/constants";
 
 interface UserScore {
   score: number; tier: number; repaymentCount: number; onTimeCount: number;
+  cumulativeVolume?: number;
   loanCount?: number; repaidCount?: number; defaultCount?: number;
 }
 interface LoanAccount {
@@ -399,7 +400,7 @@ export default function Home() {
 
   useEffect(() => {
     if (mode === "simulation") {
-      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0 });
+      setUserScore({ score: 120, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
       setLoanAccount(null);
       setEligibility({ eligible: true, maxAmount: TIERS[0].limit, limit: 50, signals: { layer1: true, layer2: true, layer3: false, layer3Count: 3 } } as any);
       return;
@@ -447,7 +448,21 @@ export default function Home() {
       await new Promise(r => setTimeout(r, 800));
       const oldScore = userScore?.score ?? 120;
       setPrevScore(oldScore);
-      setUserScore({ score: oldScore + 30, tier: Math.min((userScore?.tier ?? 0), 3), repaymentCount: (userScore?.repaymentCount ?? 0) + 1, onTimeCount: (userScore?.onTimeCount ?? 0) + 1 });
+      const repaidAmount = loanAccount?.amount ?? 0;
+      const currentTierForCalc = userScore?.tier ?? 0;
+      const minLoan = [5, 10, 25, 50][currentTierForCalc] ?? 5;
+      const countsTowardTier = repaidAmount >= minLoan;
+      const newOnTime = (userScore?.onTimeCount ?? 0) + (countsTowardTier ? 1 : 0);
+      const newVolume = (userScore?.cumulativeVolume ?? 0) + (countsTowardTier ? repaidAmount : 0);
+      const newRepayCount = (userScore?.repaymentCount ?? 0) + 1;
+      const scoreGain = countsTowardTier ? 30 : 10;
+      const thresholds: [number, number][] = [[2,15],[3,50],[5,150],[7,400]];
+      let newTier = currentTierForCalc;
+      if (currentTierForCalc < 4) {
+        const [needRepay, needVol] = thresholds[currentTierForCalc];
+        if (newOnTime >= needRepay && newVolume >= needVol) newTier = currentTierForCalc + 1;
+      }
+      setUserScore({ score: oldScore + scoreGain, tier: newTier, repaymentCount: newRepayCount, onTimeCount: newOnTime, cumulativeVolume: newVolume });
       setLoanAccount(null); setRepaidSuccess({ txSig: "simulation" });
       setLoading(false); return;
     }
@@ -520,11 +535,13 @@ export default function Home() {
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
             {(["simulation","devnet"] as const).map(m => (
-              <button key={m} onClick={() => { setMode(m); localStorage.setItem("minjame_mode", m); }}
-                style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, cursor:"pointer", border:"none", fontFamily:"inherit", transition:"all 0.2s",
+              <button key={m} onClick={() => { if (m === "devnet") return; setMode(m); localStorage.setItem("minjame_mode", m); }}
+                style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, border:"none", fontFamily:"inherit", transition:"all 0.2s",
+                  cursor: m === "devnet" ? "not-allowed" : "pointer",
+                  opacity: m === "devnet" ? 0.35 : 1,
                   background: mode === m ? (m === "simulation" ? "rgba(245,158,11,0.15)" : "#6C35E8") : "transparent",
                   color: mode === m ? (m === "simulation" ? "#f59e0b" : "#fff") : "#555A72" }}>
-                {m === "simulation" ? "Simulation" : "Devnet"}
+                {m === "simulation" ? "Simulation" : "Devnet (soon)"}
               </button>
             ))}
           </div>
