@@ -44,6 +44,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 import { fetchUserScore, fetchActiveLoan, createLoan, repayLoan } from "../lib/solana";
 import { checkEligibility } from "../lib/eligibility";
+import { EligibilityScanner } from "./components/EligibilityScanner";
 import { TIERS, APR_BRACKETS, RPC_URL } from "../lib/constants";
 
 interface UserScore {
@@ -314,7 +315,12 @@ function SplashScreen({ onEnter }: { onEnter: () => void }) {
         </div>
         <p style={{ fontSize:13, color:"#555A72" }}>Built on Solana</p>
         <div style={{ display:"flex", gap:24 }}>
-          <a href="https://github.com/Graziqt6/minjame" target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B8FA8", textDecoration:"none" }}>GitHub</a>
+          <a href="https://github.com/Graziqt6/minjame" target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B8FA8", textDecoration:"none" }}>GitHub</a><a href="https://x.com/minjamesol" target="_blank" rel="noopener noreferrer"
+  style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:36, height:36, borderRadius:10, border:"1px solid rgba(255,255,255,0.07)", color:"#f0eef8", textDecoration:"none" }}>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+</a>
           <a href="https://explorer.solana.com/address/86p3JFFhFnaP866XbRivhZuagf4SaoMkHG1dFvWnvpJ4?cluster=devnet" target="_blank" rel="noreferrer" style={{ fontSize:13, color:"#8B8FA8", textDecoration:"none" }}>Explorer</a>
         </div>
       </footer>
@@ -379,6 +385,8 @@ export default function Home() {
   });
   const t = T[lang];
   const [mode, setMode] = useState<"simulation" | "devnet">("simulation");
+const [showScanner, setShowScanner] = useState(false);
+const [switchingMode, setSwitchingMode] = useState<null | "simulation" | "devnet">(null);
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
@@ -396,23 +404,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); setBypassElig(false); return; }
-    if (mode === "simulation") {
+if (mode === "simulation") {
       setLoanAccount(null);
-      const runElig = async () => {
-        try {
-          const elig = await checkEligibility(publicKey.toString());
-          setEligibility(elig);
-          if (elig.eligible || bypassElig) {
-            setUserScore({ score: bypassElig && !elig.eligible ? 50 : 100, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
-          } else {
-            setUserScore(null);
-          }
-        } catch {
-          setEligibility({ eligible: false, reason: "Could not read wallet history." });
-          setUserScore(null);
-        }
-      };
-      runElig();
+      if (!eligibility) {
+        setShowScanner(true);
+      }
       return;
     }
     const load = async () => {
@@ -495,8 +491,49 @@ export default function Home() {
 
   return (
     <div style={{ minHeight:"100vh", background:"#050816", color:"#f0eef8", fontFamily:"'DM Sans', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
+      <style>{`
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+  @keyframes fadeMode { 0%{opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
+  @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+`}</style>
 
+      {showScanner && publicKey && (
+        <EligibilityScanner
+          walletAddress={publicKey.toString()}
+          lang={lang}
+          onComplete={(result, passed) => {
+            setEligibility(result);
+            setShowScanner(false);
+            if (passed || bypassElig) {
+              setUserScore({ score: passed ? 100 : 50, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
+            }
+          }}
+          onTrySimulation={() => {
+            setBypassElig(true);
+            setEligibility({ eligible: false, limit: 5, signals: { layer1: false, layer2: false, layer3: false, layer3Count: 0 } });
+            setUserScore({ score: 50, tier: 0, repaymentCount: 0, onTimeCount: 0, cumulativeVolume: 0 });
+            setShowScanner(false);
+          }}
+        />
+      )}
+
+      {switchingMode && (
+        <div style={{ position:"fixed", inset:0, zIndex:999, display:"flex", alignItems:"center", justifyContent:"center",
+          background: switchingMode === "devnet" ? "radial-gradient(circle at center, rgba(108,53,232,0.45), rgba(5,8,22,0.97))" : "radial-gradient(circle at center, rgba(245,158,11,0.3), rgba(5,8,22,0.97))",
+          backdropFilter:"blur(14px)", pointerEvents:"none", animation:"fadeMode 1.4s ease forwards" }}>
+          <div style={{ textAlign:"center" }}>
+            <div style={{ fontSize:11, letterSpacing:4, color: switchingMode === "devnet" ? "#8B5CF6" : "#f59e0b", textTransform:"uppercase", fontWeight:600, marginBottom:12 }}>
+              {lang === "id" ? "Memasuki Mode" : "Entering Mode"}
+            </div>
+            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:48, fontWeight:800, color:"#f0eef8", letterSpacing:-1 }}>
+              {switchingMode === "devnet" ? "DEVNET" : "SIMULATION"}
+            </div>
+            <div style={{ marginTop:14, fontSize:13, color:"#8B8FA8" }}>
+              {switchingMode === "simulation" ? (lang === "id" ? "Eksperimen aman tanpa biaya gas" : "Safe sandbox, no gas fees") : ""}
+            </div>
+          </div>
+        </div>
+      )}
       {/* MODALS */}
       {repaidSuccess && (
         <div style={{ position:"fixed", inset:0, background:"rgba(5,8,22,0.9)", backdropFilter:"blur(8px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
@@ -544,7 +581,13 @@ export default function Home() {
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
             {(["simulation","devnet"] as const).map(m => (
-              <button key={m} onClick={() => { if (m === "devnet") return; setMode(m); }}
+              <button key={m} onClick={() => {
+                  if (m === "devnet") return;
+                  if (m === mode) return;
+                  setSwitchingMode(m);
+                  setTimeout(() => setMode(m), 600);
+                  setTimeout(() => setSwitchingMode(null), 1400);
+                }}
                 style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, border:"none", fontFamily:"inherit", transition:"all 0.2s",
                   cursor: m === "devnet" ? "not-allowed" : "pointer",
                   opacity: m === "devnet" ? 0.35 : 1,
