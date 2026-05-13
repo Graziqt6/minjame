@@ -38,7 +38,7 @@ const T = {
 };
 
 import { ModeSelect } from "./mode-select";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Connection } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
@@ -362,6 +362,7 @@ const TIER_COLORS: Record<number, { dot: string; text: string }> = {
 
 export default function Home() {
   const { publicKey, connected, ...walletRest } = useWallet();
+  const { connection } = useConnection();
   const wallet = { publicKey, connected, ...walletRest };
 
   const [showSplash, setShowSplash]       = useState(true);
@@ -406,11 +407,9 @@ const [wrongNetwork, setWrongNetwork]   = useState(false);
   useEffect(() => {
     if (!connected || !publicKey) { setWrongNetwork(false); return; }
     const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
-    const check = async () => {
+const check = async () => {
       try {
-        const { Connection } = await import("@solana/web3.js");
-        const conn = new Connection("https://api.devnet.solana.com", "confirmed");
-        const genesis = await conn.getGenesisHash();
+        const genesis = await connection.getGenesisHash();
         setWrongNetwork(genesis !== DEVNET_GENESIS);
       } catch { setWrongNetwork(false); }
     };
