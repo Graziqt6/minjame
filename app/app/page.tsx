@@ -387,6 +387,7 @@ export default function Home() {
   const [mode, setMode] = useState<"simulation" | "devnet">("simulation");
 const [showScanner, setShowScanner] = useState(false);
 const [switchingMode, setSwitchingMode] = useState<null | "simulation" | "devnet">(null);
+const [wrongNetwork, setWrongNetwork]   = useState(false);
 
   const currentTier   = userScore ? TIERS[userScore.tier] : null;
   const maxAmount     = mode === 'simulation' ? (TIERS[userScore?.tier ?? 0]?.limit ?? 10) : (eligibility?.maxAmount ?? currentTier?.limit ?? 10);
@@ -401,6 +402,22 @@ const [switchingMode, setSwitchingMode] = useState<null | "simulation" | "devnet
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!connected || !publicKey) { setWrongNetwork(false); return; }
+    const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
+    const check = async () => {
+      try {
+        const { Connection } = await import("@solana/web3.js");
+        const conn = new Connection("https://api.devnet.solana.com", "confirmed");
+        const genesis = await conn.getGenesisHash();
+        setWrongNetwork(genesis !== DEVNET_GENESIS);
+      } catch { setWrongNetwork(false); }
+    };
+    check();
+    const interval = setInterval(check, 5000);
+    return () => clearInterval(interval);
+  }, [connected, publicKey]);
 
   useEffect(() => {
     if (!connected || !publicKey) { setUserScore(null); setLoanAccount(null); setEligibility(null); setBypassElig(false); return; }
@@ -426,6 +443,24 @@ if (mode === "simulation") {
     load();
   }, [connected, publicKey]);
 
+  function handleModeSwitch(newMode: "simulation" | "devnet") {
+    if (newMode === mode) return;
+    setSwitchingMode(newMode);
+    setLoanAccount(null);
+    setUserScore(null);
+    setEligibility(null);
+    setBypassElig(false);
+    setAmount(10);
+    setTxError(null);
+    setStatus(null);
+    setBorrowSuccess(null);
+    setRepaidSuccess(null);
+    setTimeout(() => {
+      setMode(newMode);
+      if (newMode === "simulation") setShowScanner(true);
+    }, 600);
+    setTimeout(() => setSwitchingMode(null), 1400);
+  }
   const handleBorrow = async () => {
     setLoading(true); setTxError(null);
     if (mode === "simulation") {
@@ -497,6 +532,38 @@ if (mode === "simulation") {
   @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 `}</style>
 
+      {wrongNetwork && connected && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(5,8,22,0.97)", backdropFilter:"blur(20px)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+          <div style={{ width:"100%", maxWidth:480, background:"#0E1225", border:"1px solid rgba(245,158,11,0.25)", borderRadius:20, padding:36, fontFamily:"'DM Sans',sans-serif", textAlign:"center" }}>
+            <div style={{ width:52, height:52, borderRadius:"50%", background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.3)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:700, color:"#f0eef8", marginBottom:8 }}>
+              Wrong Network
+            </div>
+            <div style={{ fontSize:13, color:"#8B8FA8", lineHeight:1.7, marginBottom:24 }}>
+              MINJAME runs on <span style={{ color:"#f59e0b", fontWeight:600 }}>Solana Devnet</span>.<br/>
+              Your wallet is connected to a different network.
+            </div>
+            <div style={{ background:"#181D35", borderRadius:14, padding:20, textAlign:"left", marginBottom:20 }}>
+              <div style={{ fontSize:12, fontWeight:600, color:"#8B5CF6", marginBottom:12, textTransform:"uppercase", letterSpacing:1 }}>How to switch in Phantom</div>
+              {[
+                "Open Phantom wallet",
+                "Tap the ⚙️ Settings icon (bottom right)",
+                "Select Developer Settings",
+                "Tap Change Network",
+                "Choose Devnet",
+              ].map((step, i) => (
+                <div key={i} style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+                  <div style={{ width:20, height:20, borderRadius:"50%", background:"rgba(139,92,246,0.15)", border:"1px solid rgba(139,92,246,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#8B5CF6", flexShrink:0, marginTop:1 }}>{i+1}</div>
+                  <div style={{ fontSize:13, color:"#8B8FA8", lineHeight:1.5 }}>{step}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize:12, color:"#555A72" }}>Checking network automatically every 5 seconds...</div>
+          </div>
+        </div>
+      )}
       {showScanner && publicKey && (
         <EligibilityScanner
           walletAddress={publicKey.toString()}
@@ -582,18 +649,13 @@ if (mode === "simulation") {
           <div style={{ display:"flex", alignItems:"center", background:"#0E1225", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:4, gap:4 }}>
             {(["simulation","devnet"] as const).map(m => (
               <button key={m} onClick={() => {
-                  if (m === "devnet") return;
-                  if (m === mode) return;
-                  setSwitchingMode(m);
-                  setTimeout(() => setMode(m), 600);
-                  setTimeout(() => setSwitchingMode(null), 1400);
+                  handleModeSwitch(m);
                 }}
                 style={{ padding:"6px 14px", borderRadius:7, fontSize:12, fontWeight:500, border:"none", fontFamily:"inherit", transition:"all 0.2s",
-                  cursor: m === "devnet" ? "not-allowed" : "pointer",
-                  opacity: m === "devnet" ? 0.35 : 1,
+                  cursor: "pointer",
                   background: mode === m ? (m === "simulation" ? "rgba(245,158,11,0.15)" : "#6C35E8") : "transparent",
                   color: mode === m ? (m === "simulation" ? "#f59e0b" : "#fff") : "#555A72" }}>
-                {m === "simulation" ? "Simulation" : "Devnet (soon)"}
+                {m === "simulation" ? "Simulation" : "Devnet"}
               </button>
             ))}
           </div>
